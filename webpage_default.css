@@ -1,0 +1,51 @@
+body {
+     color:#000000;
+     background: #FFFAFA;
+     font-family:Palatino,Helvetica,Avantgarde,Arial,sans-serif;
+     font-style:normal;
+     font-size:100%}
+
+a:link{
+       color: #441111;
+       text-decoration: underline; 
+      }
+
+a:visited{
+         text-decoration: underline; 
+         color: #663333;
+         }
+
+a:hover, a:active { 
+	text-decoration: underline; 
+	color: #996633;
+	}
+
+table.axe {
+          background: #4682B4;
+          border-color: black;
+          border-style: inset;
+          border-width: thick;
+          text-align: center;
+          }
+
+
+th.axe {
+       background: #3355;
+       border-color: white;
+       border-style: inset;
+       border-width: thick;
+       text-align: center;
+       }
+
+td.axe {
+       background: #C0C0C0;
+       border-color: black;
+       border-style: inset;
+       border-width: thick;
+       text-align: center;
+       }
+
+h2, h3, h6 {
+           color:#000000;
+           font-style:oblique
+           }
