@@ -478,7 +478,7 @@ def main():
         CW.CreateWebpage.writeHeader(f_webpage,webpage_name)
         CW.CreateWebpage.writeColumnNames(f_webpage,columnnames,non_sortable_cols)
         for specid in SPECID:
-            ifux = fplane.by_ifuslot(CAM_IFUSLOT_DICT(specid)).x
+            ifux = fplane.by_ifuslot(CAM_IFUSLOT_DICT[specid]).x
             ifuy = fplane.by_ifuslot(CAM_IFUSLOT_DICT(specid)).y
             if args.debug:
                 print(specid)
