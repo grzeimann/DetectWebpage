@@ -567,8 +567,6 @@ def main():
                                     datakeep['xh'].append(xh)
                                     datakeep['yh'].append(yh)
                                     datakeep['d'].append(d[l])
-                                    datakeep['dra'].append(dx[l])
-                                    datakeep['ddec'].append(dx[l])
                                     datakeep['sn'].append(sn)
                                     if args.debug:
                                         Di.basename[dither]
