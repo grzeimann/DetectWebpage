@@ -223,16 +223,16 @@ def parse_args(argv=None):
                         help='''Detect File ''', 
                         default='detect.txt')           
 
-    parser.add_argument("--RA", nargs='?', type=float, 
-                        help='''RA''', 
+    parser.add_argument("--ra", nargs='?', type=float, 
+                        help='''ra''', 
                         default=None)
                         
-    parser.add_argument("--Dec", nargs='?', type=float, 
+    parser.add_argument("--dec", nargs='?', type=float, 
                         help='''Dec''', 
                         default=None)
 
-    parser.add_argument("--Par", nargs='?', type=float, 
-                        help='''Parangle''', 
+    parser.add_argument("--rot", nargs='?', type=float, 
+                        help='''rotation''', 
                         default=None)
 
     parser.add_argument("--debug", help='''Debug''',
@@ -249,13 +249,13 @@ def parse_args(argv=None):
 
     # Check that the arguments are filled
 
-    if args.RA is None:
+    if args.ra is None:
         msg = 'No RA was provided'
         parser.error(msg)
-    if args.Dec is None:
+    if args.dec is None:
         msg = 'No Dec was provided'
         parser.error(msg)
-    if args.Par is None:
+    if args.rot is None:
         msg = 'No Parangle was provided'
         parser.error(msg)
     if args.folder is None:
@@ -467,8 +467,8 @@ def main():
     webpage_name = 'Detect Visualization_' + op.basename(args.folder)
     non_sortable_cols = [3,4]
     fplane = FPlane(fplane_file)
-    tp = TP(args.RA, args.Dec, args.Par)
-    image_fn = pick_image(args.RA, args.Dec)
+    tp = TP(args.ra, args.dec, args.par)
+    image_fn = pick_image(args.ra, args.dec)
     wcs = WCS(image_fn)
     data = fits.open(image_fn)[0].data
     if not op.exists('images'):
