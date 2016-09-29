@@ -12,6 +12,7 @@ from astropy.io import fits
 import numpy as np
 import matplotlib.pyplot as plt
 import os.path as op
+import os
 import textwrap
 import CreateWebpage as CW
 from collections import OrderedDict
@@ -268,6 +269,28 @@ def parse_args(argv=None):
  
     return args
     
+def pick_image(ra, dec):
+    letters = ['A','B','C']
+    numbers = np.arange(10)
+    rai = []
+    deci = []
+    l = []
+    n = []
+    for let in letters:
+        for number in numbers:
+            num=str(int(number))
+            fn = op.join(image_dir,'%s%s_g_sci.fits' %(let,num))
+            rai.append(fits.open(fn)[0].header['crval1'])
+            deci.appendfits.open(fn)[0].header['crval2'])
+            l.append(let)
+            n.append(num)
+    x = np.array(rai)
+    y = np.array(deci)
+    d = np.sqrt(((ra-x)*np.cos(dec*np.pi/180.))**2+(dec-y)**2)
+    ind = np.argmin(d)
+    filename = op.join(image_dir,'%s%s_g_sci.fits' %(l[ind],n[ind]))
+    return filename
+    
 def get_w_as_r(seeing, gridsize, rstep, rmax, profile_name='moffat'):
     fradius = 0.75 # VIRUS
     if profile_name == 'moffat':
@@ -445,8 +468,11 @@ def main():
     non_sortable_cols = [3,4]
     fplane = FPlane(fplane_file)
     tp = TP(args.RA, args.Dec, args.Par)
-    wcs = WCS(image)
-    data = fits.open(image)[0].data
+    image_fn = pick_image(args.RA, args.Dec)
+    wcs = WCS(image_fn)
+    data = fits.open(image_fn)[0].data
+    if not op.exists('images'):
+        os.mkdir('images')
     with open(webpage_name+'.html', 'w') as f_webpage:
         CW.CreateWebpage.writeHeader(f_webpage,webpage_name)
         CW.CreateWebpage.writeColumnNames(f_webpage,columnnames,non_sortable_cols)
