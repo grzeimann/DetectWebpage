@@ -549,8 +549,8 @@ def main():
                                     f0 = D[side].get_reference_f(l+1)
                                     xi = D[side].map_wf_x(Cat['l'][i],f0)
                                     yi = D[side].map_wf_y(Cat['l'][i],f0)
-                                    xfiber = IFU.xifu[side]+Di.dx[dither]
-                                    yfiber = IFU.yifu[side]+Di.dy[dither]
+                                    xfiber = IFU.xifu[side][l]+Di.dx[dither]
+                                    yfiber = IFU.yifu[side][l]+Di.dy[dither]
                                     xfiber += ifuy
                                     yfiber += ifux
                                     ra, dec = tp.xy2raDec(xfiber, yfiber)
