@@ -357,7 +357,7 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
     pixsize_y = np.sqrt(wcs.wcs.cd[1,0]**2 + wcs.wcs.cd[1,1]**2)*3600. 
     position = SkyCoord(ras, decs, unit="deg", frame='fk5')   
     cutout = Cutout2D(data, position, (50,50), wcs=wcs)
-    
+    print(cutout)
     fig = plt.figure(figsize=(5,5))
     plt.imshow(cutout,origin='lower',interpolation='nearest',vmin=-5,vmax=50, 
                cmap=cmap)
@@ -472,7 +472,7 @@ def main():
     tp = TP(args.ra, args.dec, args.rot)
     image_fn = pick_image(args.ra, args.dec)
     wcs = WCS(image_fn)
-    data = np.array(fits.open(image_fn)[0].data, dtype=float)
+    data = fits.open(image_fn)[0].data
     if not op.exists('images'):
         os.mkdir('images')
     with open(webpage_name+'.html', 'w') as f_webpage:
