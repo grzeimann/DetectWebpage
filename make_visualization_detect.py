@@ -280,10 +280,11 @@ def pick_image(ra, dec):
         for number in numbers:
             num=str(int(number))
             fn = op.join(image_dir,'%s%s_g_sci.fits' %(let,num))
-            rai.append(fits.open(fn)[0].header['crval1'])
-            deci.append(fits.open(fn)[0].header['crval2'])
-            l.append(let)
-            n.append(num)
+            if op.exists(fn):
+                rai.append(fits.open(fn)[0].header['crval1'])
+                deci.append(fits.open(fn)[0].header['crval2'])
+                l.append(let)
+                n.append(num)
     x = np.array(rai)
     y = np.array(deci)
     d = np.sqrt(((ra-x)*np.cos(dec*np.pi/180.))**2+(dec-y)**2)
