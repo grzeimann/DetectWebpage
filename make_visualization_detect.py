@@ -467,7 +467,7 @@ def main():
     webpage_name = 'Detect Visualization_' + op.basename(args.folder)
     non_sortable_cols = [3,4]
     fplane = FPlane(fplane_file)
-    tp = TP(args.ra, args.dec, args.par)
+    tp = TP(args.ra, args.dec, args.rot)
     image_fn = pick_image(args.ra, args.dec)
     wcs = WCS(image_fn)
     data = fits.open(image_fn)[0].data
