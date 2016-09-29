@@ -345,7 +345,7 @@ def build_spec_image(datakeep, outfile, cwave, dwave=1.0, cmap=None, debug=False
     plt.close(fig)
 
 
-def make_image_cutout(datakeep, data, WCS, ras, decs, outfile, cmap2=None,
+def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
                       cmap=None, debug=False):
     if not cmap:
         # Default cmap is gray
