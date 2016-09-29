@@ -20,6 +20,13 @@ from astropy.stats import biweight_location, biweight_midvariance
 from scipy.ndimage.filters import gaussian_filter
 from astropy.modeling.models import Moffat2D, Gaussian2D
 from photutils import CircularAperture, aperture_photometry
+from astropy.coordinates import SkyCoord
+from astropy.nddata import Cutout2D
+from astropy.wcs import WCS
+from astropy.wcs.utils import skycoord_to_pixel
+from pyhetdex.het.fplane import FPlane
+from pyhetdex.coordinates.tangent_projection_astropy import TangentPlane as TP
+
 
 dist_thresh = 2. # Fiber Distance
 sn_cut = 4.0 # S/N Cut
@@ -28,9 +35,28 @@ yw = 10 # image width in y-dir
 res = [3,9]
 ww = xw*1.9 # wavelength width
 virus_config = '/work/03946/hetdex/maverick/virus_config'
+fplane_file = '/home/00115/gebhardt/fplane.txt' 
+image_dir = '/work/03229/iwold/maverick/fall_field/stack/v2/psf/nano'
 #virus_config = '/Users/gregz/cure/virus_early/virus_config'
 
 SPECBIG = ["L","R"]  
+
+CAM_IFUSLOT_DICT = {'004':'093',
+                    '037':'074',
+                    '027':'075',                
+                    '047':'076',
+                    '024':'073',
+                    '013':'084',
+                    '016':'085',
+                    '041':'086',
+                    '051':'083',
+                    '008':'094',
+                    '025':'095',
+                    '038':'096',
+                    '020':'103',
+                    '032':'104',
+                    '012':'105',
+                    '017':'106',}
 
 IFUSLOT_DICT = {'073':['024','033'],
                 '074':['037','024'],
@@ -74,7 +100,7 @@ SPECID = ["004","008","012","013","016","017","020","024","025","027","032",
 SPECID = ["051"]
 SIDE = ["L", "R"]
 
-columnnames = ["SPECID", "NR", "ID", "Source_Info", "2D Plots","Spec Plots"]
+columnnames = ["SPECID", "NR", "ID", "Source_Info", "2D Plots","Spec Plots","Images]
 
 class ParseDither():
     """
@@ -196,6 +222,18 @@ def parse_args(argv=None):
                         help='''Detect File ''', 
                         default='detect.txt')           
 
+    parser.add_argument("--RA", nargs='?', type=float, 
+                        help='''RA''', 
+                        default=None)
+                        
+    parser.add_argument("--Dec", nargs='?', type=float, 
+                        help='''Dec''', 
+                        default=None)
+
+    parser.add_argument("--Par", nargs='?', type=float, 
+                        help='''Parangle''', 
+                        default=None)
+
     parser.add_argument("--debug", help='''Debug''',
                         action="count", default=0)   
                                                                          
@@ -209,6 +247,19 @@ def parse_args(argv=None):
     #    parser.error(msg)         
 
     # Check that the arguments are filled
+
+    if args.RA is None:
+        msg = 'No RA was provided'
+        parser.error(msg)
+    if args.Dec is None:
+        msg = 'No Dec was provided'
+        parser.error(msg)
+    if args.Par is None:
+        msg = 'No Parangle was provided'
+        parser.error(msg)
+    if args.folder is None:
+        msg = 'No folder was provided'
+        parser.error(msg)
     if args.dither_file is None:
         msg = 'No dither file was provided'
         parser.error(msg)
@@ -269,10 +320,39 @@ def build_spec_image(datakeep, outfile, cwave, dwave=1.0, cmap=None, debug=False
     fig.savefig(outfile,dpi=150)
     plt.close(fig)
 
-def build_2d_image(datakeep, outfile, cmap=None, debug=False):
+
+def make_image_cutout(datakeep, data, WCS, ras, decs, outfile, cmap2=None,
+                      cmap=None, debug=False):
     if not cmap:
         # Default cmap is gray
         cmap = plt.get_cmap('gray_r')
+    if not cmap2:
+        cmap2 = plt.get_cmap('viridis')
+        colors = cmap2(np.arange(len(datakeep['ra'])))
+    pixsize_x = np.sqrt(wcs.wcs.cd[0,0]**2 + wcs.wcs.cd[0,1]**2)*3600. 
+    pixsize_y = np.sqrt(wcs.wcs.cd[1,0]**2 + wcs.wcs.cd[1,1]**2)*3600. 
+    position = SkyCoord(ras, decs, unit="deg", frame='fk5')   
+    cutout = Cutout2D(data, position, (50,50), wcs=wcs)  
+    fig = plt.figure(figsize=(5,5))
+    plt.imshow(cutout,origin='lower',interpolation='nearest',vmin=-5,vmax=50, 
+               cmap=cmap)
+    for i in xrange(len(datakeep['ra'])):
+        xf,yf = skycoord_to_pixel(
+             SkyCoord(datakeep['ra'][i],datakeep['dec'][i], unit="deg", frame='fk5'), 
+             wcs=cutout.wcs)
+        circle = plt.Circle((xf, yf), radius=.75/pixsize_x, fc='none', 
+                            ec=colors[i,0:3], zorder=2, alpha=0.6)
+        plt.gca().add_patch(circle)
+    fig.savefig(outfile,dpi=150)
+    plt.close(fig)        
+    
+def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
+    if not cmap:
+        # Default cmap is gray
+        cmap = plt.get_cmap('gray_r')
+    if not cmap2:
+        cmap2 = plt.get_cmap('viridis')
+        colors = cmap2(np.arange(len(datakeep['ra'])))
     N = len(datakeep['xi'])
     borderxl = 0.05
     borderxr = 0.15
@@ -361,13 +441,18 @@ def build_2d_image(datakeep, outfile, cmap=None, debug=False):
     
 def main():
     args = parse_args()
-    #De = ParseDetect(args.detect_file)
     webpage_name = 'Detect Visualization_' + op.basename(args.folder)
     non_sortable_cols = [3,4]
+    fplane = FPlane(fplane_file)
+    tp = TP(args.RA, args.Dec, args.Par)
+    wcs = WCS(image)
+    data = fits.open(image)[0].data
     with open(webpage_name+'.html', 'w') as f_webpage:
         CW.CreateWebpage.writeHeader(f_webpage,webpage_name)
         CW.CreateWebpage.writeColumnNames(f_webpage,columnnames,non_sortable_cols)
         for specid in SPECID:
+            ifux = fplane.by_ifuslot(CAM_IFUSLOT_DICT(specid)).x
+            ifuy = fplane.by_ifuslot(CAM_IFUSLOT_DICT(specid)).y
             if args.debug:
                 print(specid)
             ifu_fn = op.join(virus_config, 'IFUcen_files', 'IFUcen_VIFU' + CAM_IFU_DICT[specid] + '.txt')
@@ -415,21 +500,35 @@ def main():
                     datakeep['yh'] = []
                     datakeep['sn'] = []
                     datakeep['d'] = []
+                    datakeep['dx'] = []
+                    datakeep['dy'] = []
                     datakeep['im'] = []
                     datakeep['err'] = []
                     datakeep['spec'] = []
                     datakeep['specwave'] = []
                     datakeep['cos'] = []
+                    datakeep['par'] = []
+                    datakeep['ra'] = []
+                    datakeep['dec'] = []
+                    ras, decs = tp.xy2raDec(x+ifuy,y+ifux)
                     if sn>sn_cut:
                         for side in SIDE:
                             for dither in xrange(len(Di.dx)):
-                                d = np.sqrt((x-IFU.xifu[side]-Di.dx[dither])**2 
-                                            + (y-IFU.yifu[side]-Di.dy[dither])**2)
+                                dx = x-IFU.xifu[side]-Di.dx[dither]
+                                dy = y-IFU.yifu[side]-Di.dy[dither]
+                                d = np.sqrt(dx**2 + dy**2)
                                 loc = np.where(d<dist_thresh)[0]
                                 for l in loc:
                                     f0 = D[side].get_reference_f(l+1)
                                     xi = D[side].map_wf_x(Cat['l'][i],f0)
                                     yi = D[side].map_wf_y(Cat['l'][i],f0)
+                                    xfiber = IFU.xifu[side]+Di.dx[dither]
+                                    yfiber = IFU.yifu[side]+Di.dy[dither]
+                                    xfiber += ifuy
+                                    yfiber += ifux
+                                    ra, dec = tp.xy2raDec(xfiber, yfiber)
+                                    datakeep['ra'].append(ra)
+                                    datakeep['dec'].append(dec)
                                     xl = int(np.round(xi-xw))
                                     xh = int(np.round(xi+xw))
                                     yl = int(np.round(yi-yw))
@@ -441,6 +540,8 @@ def main():
                                     datakeep['xh'].append(xh)
                                     datakeep['yh'].append(yh)
                                     datakeep['d'].append(d[l])
+                                    datakeep['dra'].append(dx[l])
+                                    datakeep['ddec'].append(dx[l])
                                     datakeep['sn'].append(sn)
                                     if args.debug:
                                         Di.basename[dither]
@@ -458,6 +559,7 @@ def main():
                                                      dir_fn, 'Fe'+base_fn+'_'+side+'.fits'))
                                     if op.exists(im_fn):
                                         datakeep['im'].append(fits.open(im_fn)[0].data[yl:yh,xl:xh])
+                                        datakeep['par'].append(fits.open(im_fn)[0].header['PARANGLE'])
                                     if op.exists(err_fn):
                                         datakeep['err'].append(fits.open(err_fn)[0].data[yl:yh,xl:xh])
                                     if op.exists(cos_fn):
@@ -482,7 +584,11 @@ def main():
                                        Cat['ID'][i]))
                         build_spec_image(datakeep, outfile_spec, 
                                          cwave=Cat['l'][i], debug=args.debug)        
-
+                        outfile_cut = ('images/imagecut_%s_specid_%s_object_%i_%i.png' 
+                                    % (op.basename(args.folder), specid, Cat['NR'][i], 
+                                       Cat['ID'][i]))
+                        make_image_cutout(datakeep, data, wcs, ras, decs, 
+                                          outfile_cut, debug=args.debug)
                         dict_web = OrderedDict()
                         dict_web['Number_1'] = int(specid)
                         dict_web['Number_2'] = int(Cat['NR'][i])
@@ -492,6 +598,7 @@ def main():
                                                ('flux: %0.1f'% (flux))]
                         dict_web['Image_1'] = outfile_2d
                         dict_web['Image_2'] = outfile_spec
+                        dict_web['Image_3'] = outfile_cut
                         CW.CreateWebpage.writeColumn(f_webpage,dict_web)  
         CW.CreateWebpage.writeEnding(f_webpage)     
        
