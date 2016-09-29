@@ -479,7 +479,7 @@ def main():
         CW.CreateWebpage.writeColumnNames(f_webpage,columnnames,non_sortable_cols)
         for specid in SPECID:
             ifux = fplane.by_ifuslot(CAM_IFUSLOT_DICT[specid]).x
-            ifuy = fplane.by_ifuslot(CAM_IFUSLOT_DICT(specid)).y
+            ifuy = fplane.by_ifuslot(CAM_IFUSLOT_DICT[specid]).y
             if args.debug:
                 print(specid)
             ifu_fn = op.join(virus_config, 'IFUcen_files', 'IFUcen_VIFU' + CAM_IFU_DICT[specid] + '.txt')
