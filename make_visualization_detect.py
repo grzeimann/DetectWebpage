@@ -101,7 +101,7 @@ SPECID = ["004","008","012","013","016","017","020","024","025","027","032",
 SPECID = ["051"]
 SIDE = ["L", "R"]
 
-columnnames = ["SPECID", "NR", "ID", "Source_Info", "2D Plots","Spec Plots","Images]
+columnnames = ["SPECID", "NR", "ID", "Source_Info", "2D Plots","Spec Plots","Cutouts"]
 
 class ParseDither():
     """
@@ -281,7 +281,7 @@ def pick_image(ra, dec):
             num=str(int(number))
             fn = op.join(image_dir,'%s%s_g_sci.fits' %(let,num))
             rai.append(fits.open(fn)[0].header['crval1'])
-            deci.appendfits.open(fn)[0].header['crval2'])
+            deci.append(fits.open(fn)[0].header['crval2'])
             l.append(let)
             n.append(num)
     x = np.array(rai)
