@@ -354,7 +354,9 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
         norm = plt.Normalize()
         colors = plt.cm.viridis(norm(np.arange(len(datakeep['ra'])+2)))
     pixsize_x = np.sqrt(wcs.wcs.cd[0,0]**2 + wcs.wcs.cd[0,1]**2)*3600. 
-    pixsize_y = np.sqrt(wcs.wcs.cd[1,0]**2 + wcs.wcs.cd[1,1]**2)*3600. 
+    pixsize_y = np.sqrt(wcs.wcs.cd[1,0]**2 + wcs.wcs.cd[1,1]**2)*3600.
+    ind = sorted(range(len(datakeep['d'])), key=lambda k: datakeep['d'][k], 
+                 reverse=True)
     sz = size * pixsize_x
     position = SkyCoord(ras, decs, unit="deg", frame='fk5')   
     cutout = Cutout2D(data, position, (size,size), wcs=wcs)
@@ -371,7 +373,7 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
              SkyCoord(datakeep['ra'][i],datakeep['dec'][i], unit="deg", frame='fk5'), 
              wcs=cutout.wcs)
         circle = plt.Circle(((xf-xc)*pixsize_x, (yf-yc)*pixsize_x), radius=.75, fc='none', 
-                            ec=colors[i,0:3], zorder=2, alpha=0.6)
+                            ec=colors[ind[i],0:3], zorder=2, alpha=1.0)
         plt.gca().add_patch(circle)
     fig.savefig(outfile,dpi=150)
     plt.close(fig)        
@@ -384,7 +386,7 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
         norm = plt.Normalize()
         colors = plt.cm.viridis(norm(np.arange(len(datakeep['ra'])+2)))
     N = len(datakeep['xi'])
-    bordbuff = 0.01
+    bordbuff = 0.02
     borderxl = 0.05
     borderxr = 0.15
     borderyb = 0.05
