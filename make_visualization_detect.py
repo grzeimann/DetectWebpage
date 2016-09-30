@@ -350,7 +350,7 @@ def build_spec_image(datakeep, outfile, cwave, dwave=1.0, cmap=None, debug=False
 
 
 def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
-                      cmap=None, size=50., debug=False):
+                      cmap=None, sz=5., debug=False):
     if not cmap:
         # Default cmap is gray
         cmap = plt.get_cmap('gray_r')
@@ -361,11 +361,11 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
     pixsize_y = np.sqrt(wcs.wcs.cd[1,0]**2 + wcs.wcs.cd[1,1]**2)*3600.
     ind = sorted(range(len(datakeep['d'])), key=lambda k: datakeep['d'][k], 
                  reverse=True)
-    sz = size * pixsize_x
+    size = int(sz / pixsize_x)
     position = SkyCoord(ras, decs, unit="deg", frame='fk5')   
     cutout = Cutout2D(data, position, (size,size), wcs=wcs)
     fig = plt.figure(figsize=(4,4))
-    plt.imshow(cutout.data,origin='lower',interpolation='nearest',vmin=-10,vmax=50, 
+    plt.imshow(cutout.data,origin='lower',interpolation='nearest',vmin=-.1,vmax=1, 
                cmap=cmap, extent=[-sz/2.,sz/2.,-sz/2.,sz/2.])
     xc, yc = skycoord_to_pixel(position, wcs=cutout.wcs)
     plt.scatter(0., 0.,marker='x',c='r',s=35)
