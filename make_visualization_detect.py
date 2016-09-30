@@ -357,11 +357,10 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
     pixsize_y = np.sqrt(wcs.wcs.cd[1,0]**2 + wcs.wcs.cd[1,1]**2)*3600. 
     position = SkyCoord(ras, decs, unit="deg", frame='fk5')   
     cutout = Cutout2D(data, position, (size,size), wcs=wcs)
-    fig = plt.figure(figsize=(5,5))
+    fig = plt.figure(figsize=(4,4))
     plt.imshow(cutout.data,origin='lower',interpolation='nearest',vmin=-5,vmax=50, 
                cmap=cmap, extent=[-size/2.,size/2.,-size/2.,size/2.])
-    xc, yc = skycoord_to_pixel(position, unit="deg", frame='fk5', 
-                               wcs=cutout.wcs)
+    xc, yc = skycoord_to_pixel(position, wcs=cutout.wcs)
     plt.scatter(0., 0.,marker='x',c='r',s=35)
     circle = plt.Circle((0., 0.), radius=2./pixsize_x, fc='none', 
                             ec='r', zorder=2, alpha=0.6)
