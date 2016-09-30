@@ -333,8 +333,9 @@ def build_spec_image(datakeep, outfile, cwave, dwave=1.0, cmap=None, debug=False
     mx = 0.0
     W = 0.0
     for i in xrange(N):
-        specplot.plot(datakeep['specwave'][i], datakeep['spec'][i], 
-                      alpha=0.5, color='r')
+        specplot.errorbar(datakeep['specwave'][i], datakeep['spec'][i], 
+                          yerr = datakeep['spece'][i],fmt='o',ecolor=[1.0,0.35,0.38],
+                          color=[0.9,0.1,0.1], capthick=5, capsize=0)
         w1 = np.interp(datakeep['d'][i],r,w)
         F+=(np.interp(bigwave,datakeep['specwave'][i], datakeep['spec'][i])*w1)
         W+=w1
@@ -573,6 +574,7 @@ def main():
                     datakeep['err'] = []
                     datakeep['pix'] = []
                     datakeep['spec'] = []
+                    datakeep['spece'] = []
                     datakeep['specwave'] = []
                     datakeep['cos'] = []
                     datakeep['par'] = []
@@ -621,6 +623,8 @@ def main():
                                                      dir_fn, 'c'+base_fn+'_'+side+'.fits'))
                                     FE_fn = op.join(args.folder, 'c'+specid, op.join(
                                                      dir_fn, 'Fe'+base_fn+'_'+side+'.fits'))
+                                    FEe_fn = op.join(args.folder, 'c'+specid, op.join(
+                                                     dir_fn, 'e.Fe'+base_fn+'_'+side+'.fits'))
                                     pix_fn = op.join(virus_config, 'PixelFlats',
                                                      'pixelflat_cam%s_%s.fits'%(specid,side)) 
                                     if op.exists(im_fn):
@@ -634,6 +638,7 @@ def main():
                                         datakeep['cos'].append(fits.open(cos_fn)[0].data[yl:yh,xl:xh])
                                     if op.exists(FE_fn):
                                         FE = fits.open(FE_fn)[0].data
+                                        FEe = fits.open(FEe_fn)[0].data
                                         nfib, xlen = FE.shape
                                         crval = fits.open(FE_fn)[0].header['CRVAL1']
                                         cdelt = fits.open(FE_fn)[0].header['CDELT1']
@@ -641,6 +646,7 @@ def main():
                                         Fe_indl = np.searchsorted(wave,Cat['l'][i]-ww,side='left')
                                         Fe_indh = np.searchsorted(wave,Cat['l'][i]+ww,side='right')
                                         datakeep['spec'].append(FE[l,Fe_indl:(Fe_indh+1)])
+                                        datakeep['spece'].append(FEe[l,Fe_indl:(Fe_indh+1)])
                                         datakeep['specwave'].append(wave[Fe_indl:(Fe_indh+1)])
                         if args.debug:
                             t2 = time.time()
