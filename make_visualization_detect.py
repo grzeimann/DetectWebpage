@@ -403,7 +403,7 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
                  reverse=True)
     for i in xrange(N):
         borplot = plt.axes([borderxl+0.*dx, borderyb+i*dy, 3*dx, dy])
-        implot = plt.axes([borderxl+2.*dx+bordbuff*3., borderyb+i*dy+bordbuff/2., dx1, dy1])
+        implot = plt.axes([borderxl+2.*dx+bordbuff/3., borderyb+i*dy+bordbuff/2., dx1, dy1])
         errplot = plt.axes([borderxl+1.*dx+2*bordbuff/3., borderyb+i*dy+bordbuff/2., dx1, dy1])
         cosplot = plt.axes([borderxl+0.*dx+bordbuff/1., borderyb+i*dy+bordbuff/2., dx1, dy1])
         autoAxis = borplot.axis()
