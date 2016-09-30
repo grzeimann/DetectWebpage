@@ -356,7 +356,7 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
     pixsize_x = np.sqrt(wcs.wcs.cd[0,0]**2 + wcs.wcs.cd[0,1]**2)*3600. 
     pixsize_y = np.sqrt(wcs.wcs.cd[1,0]**2 + wcs.wcs.cd[1,1]**2)*3600.
     ind = sorted(range(len(datakeep['d'])), key=lambda k: datakeep['d'][k], 
-                 reverse=True)
+                 reverse=False)
     sz = size * pixsize_x
     position = SkyCoord(ras, decs, unit="deg", frame='fk5')   
     cutout = Cutout2D(data, position, (size,size), wcs=wcs)
@@ -401,9 +401,9 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
                  reverse=True)
     for i in xrange(N):
         borplot = plt.axes([borderxl+0.*dx+bordbuff/2., borderyb+i*dy+bordbuff/2., 3*dx+bordbuff, dy+bordbuff])
-        implot = plt.axes([borderxl+2.*dx+bordbuff, borderyb+i*dy+bordbuff, dx, dy])
-        errplot = plt.axes([borderxl+1.*dx+bordbuff, borderyb+i*dy+bordbuff, dx, dy])
-        cosplot = plt.axes([borderxl+0.*dx+bordbuff, borderyb+i*dy+bordbuff, dx, dy])
+        implot = plt.axes([borderxl+2.*dx+bordbuff, borderyb+i*dy+bordbuff, dx-2*bordbuff/3., dy-2*bordbuff])
+        errplot = plt.axes([borderxl+1.*dx+bordbuff, borderyb+i*dy+bordbuff, dx-2*bordbuff/3., dy-2*bordbuff])
+        cosplot = plt.axes([borderxl+0.*dx+bordbuff, borderyb+i*dy+bordbuff, dx-2*bordbuff/3., dy-2*bordbuff])
         autoAxis = borplot.axis()
         rec = plt.Rectangle((autoAxis[0]+bordbuff/2.,autoAxis[2]+bordbuff/2.),(autoAxis[1]-autoAxis[0])*(1.-bordbuff),
                             (autoAxis[3]-autoAxis[2])*(1.-bordbuff), fill=False, lw=3, 
