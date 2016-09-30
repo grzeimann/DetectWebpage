@@ -435,7 +435,7 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
         implot.axis(ext)
         implot.axis('off')
         errplot.imshow(datakeep['pix'][ind[i]], 
-                      origin="lower", cmap=cmap, 
+                      origin="lower", cmap=plt.get_cmap('gray'), 
                       interpolation="nearest",vmin=0.9,vmax=1.1,
                       extent=ext)
         errplot.scatter(datakeep['xi'][ind[i]],datakeep['yi'][ind[i]],
