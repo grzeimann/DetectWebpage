@@ -468,7 +468,7 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
                     transform=cosplot.transAxes,fontsize=8,color='b',
                     verticalalignment='bottom', horizontalalignment='center') 
         autoAxis = borplot.axis()
-        rec = borplot.Rectangle((autoAxis[0],autoAxis[2]),(autoAxis[1]-autoAxis[0]),
+        rec = plt.Rectangle((autoAxis[0],autoAxis[2]),(autoAxis[1]-autoAxis[0]),
                             (autoAxis[3]-autoAxis[2]), fill=False, lw=2, 
                             color = colors[i,0:3], zorder=1)
         rec = borplot.add_patch(rec)
