@@ -434,9 +434,9 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
         implot.set_yticks([])
         implot.axis(ext)
         implot.axis('off')
-        errplot.imshow(datakeep['err'][ind[i]], 
+        errplot.imshow(datakeep['pix'][ind[i]], 
                       origin="lower", cmap=cmap, 
-                      interpolation="nearest",vmin=vmin,vmax=vmax,
+                      interpolation="nearest",vmin=0.9,vmax=1.1,
                       extent=ext)
         errplot.scatter(datakeep['xi'][ind[i]],datakeep['yi'][ind[i]],
                        marker='x',c='r',s=10)
@@ -558,6 +558,7 @@ def main():
                     datakeep['dy'] = []
                     datakeep['im'] = []
                     datakeep['err'] = []
+                    datakeep['pix'] = []
                     datakeep['spec'] = []
                     datakeep['specwave'] = []
                     datakeep['cos'] = []
@@ -607,11 +608,15 @@ def main():
                                                      dir_fn, 'c'+base_fn+'_'+side+'.fits'))
                                     FE_fn = op.join(args.folder, 'c'+specid, op.join(
                                                      dir_fn, 'Fe'+base_fn+'_'+side+'.fits'))
+                                    pix_fn = op.join(virus_config, 'PixelFlats',
+                                                     'pixelflat_cam%s_%s.fits'%(specid,side)) 
                                     if op.exists(im_fn):
                                         datakeep['im'].append(fits.open(im_fn)[0].data[yl:yh,xl:xh])
                                         datakeep['par'].append(fits.open(im_fn)[0].header['PARANGLE'])
                                     if op.exists(err_fn):
                                         datakeep['err'].append(fits.open(err_fn)[0].data[yl:yh,xl:xh])
+                                    if op.exists(pix_fn):
+                                        datakeep['pix'].append(fits.open(pix_fn)[0].data[yl:yh,xl:xh])
                                     if op.exists(cos_fn):
                                         datakeep['cos'].append(fits.open(cos_fn)[0].data[yl:yh,xl:xh])
                                     if op.exists(FE_fn):
