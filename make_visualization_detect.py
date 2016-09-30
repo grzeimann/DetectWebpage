@@ -356,7 +356,7 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
     pixsize_x = np.sqrt(wcs.wcs.cd[0,0]**2 + wcs.wcs.cd[0,1]**2)*3600. 
     pixsize_y = np.sqrt(wcs.wcs.cd[1,0]**2 + wcs.wcs.cd[1,1]**2)*3600.
     ind = sorted(range(len(datakeep['d'])), key=lambda k: datakeep['d'][k], 
-                 reverse=False)
+                 reverse=True)
     sz = size * pixsize_x
     position = SkyCoord(ras, decs, unit="deg", frame='fk5')   
     cutout = Cutout2D(data, position, (size,size), wcs=wcs)
@@ -370,7 +370,7 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
     plt.gca().add_patch(circle)
     for i in xrange(len(datakeep['ra'])):
         xf,yf = skycoord_to_pixel(
-             SkyCoord(datakeep['ra'][i],datakeep['dec'][i], unit="deg", frame='fk5'), 
+             SkyCoord(datakeep['ra'][ind[i]],datakeep['dec'][ind[i]], unit="deg", frame='fk5'), 
              wcs=cutout.wcs)
         circle = plt.Circle(((xf-xc)*pixsize_x, (yf-yc)*pixsize_x), radius=.75, fc='none', 
                             ec=colors[ind[i],0:3], zorder=2, alpha=1.0)
@@ -393,6 +393,8 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
     borderyt = 0.15
     dx = (1. - borderxl - borderxr) / 3.
     dy = (1. - borderyb - borderyt) / N
+    dx1 = (1. - borderxl - borderxr-2.*bordbuff) / 3.
+    dy1 = (1. - borderyb - borderyt-2.*N*bordbuff) / N
     Y = (yw / dy) / (xw / dx) * 5.
 
     fig = plt.figure(figsize=(5,Y),frameon=False)
@@ -401,9 +403,9 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
                  reverse=True)
     for i in xrange(N):
         borplot = plt.axes([borderxl+0.*dx, borderyb+i*dy, 3*dx, dy])
-        implot = plt.axes([borderxl+2.*dx+bordbuff, borderyb+i*dy+bordbuff, dx-2*bordbuff/3., dy-2*bordbuff])
-        errplot = plt.axes([borderxl+1.*dx+bordbuff, borderyb+i*dy+bordbuff, dx-2*bordbuff/3., dy-2*bordbuff])
-        cosplot = plt.axes([borderxl+0.*dx+bordbuff, borderyb+i*dy+bordbuff, dx-2*bordbuff/3., dy-2*bordbuff])
+        implot = plt.axes([borderxl+2.*dx+bordbuff, borderyb+i*dy+bordbuff, dx1, dy1])
+        errplot = plt.axes([borderxl+1.*dx+bordbuff, borderyb+i*dy+bordbuff, dx1, dy1])
+        cosplot = plt.axes([borderxl+0.*dx+bordbuff, borderyb+i*dy+bordbuff, dx1, dy1])
         autoAxis = borplot.axis()
         rec = plt.Rectangle((autoAxis[0]+bordbuff/2.,autoAxis[2]+bordbuff/2.),(autoAxis[1]-autoAxis[0])*(1.-bordbuff),
                             (autoAxis[3]-autoAxis[2])*(1.-bordbuff), fill=False, lw=3, 
