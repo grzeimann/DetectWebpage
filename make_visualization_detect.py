@@ -394,7 +394,7 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
     borderyt = 0.15
     dx = (1. - borderxl - borderxr) / 3.
     dy = (1. - borderyb - borderyt) / N
-    dx1 = (1. - borderxl - borderxr-bordbuff) / 3.
+    dx1 = (1. - borderxl - borderxr) / 3.
     dy1 = (1. - borderyb - borderyt-N*bordbuff) / N
     Y = (yw / dy) / (xw / dx) * 5.
 
