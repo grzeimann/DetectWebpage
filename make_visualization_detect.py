@@ -359,7 +359,7 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
     position = SkyCoord(ras, decs, unit="deg", frame='fk5')   
     cutout = Cutout2D(data, position, (size,size), wcs=wcs)
     fig = plt.figure(figsize=(4,4))
-    plt.imshow(cutout.data,origin='lower',interpolation='nearest',vmin=-5,vmax=50, 
+    plt.imshow(cutout.data,origin='lower',interpolation='nearest',vmin=-10,vmax=50, 
                cmap=cmap, extent=[-sz/2.,sz/2.,-sz/2.,sz/2.])
     xc, yc = skycoord_to_pixel(position, wcs=cutout.wcs)
     plt.scatter(0., 0.,marker='x',c='r',s=35)
@@ -398,7 +398,7 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
     ind = sorted(range(len(datakeep['d'])), key=lambda k: datakeep['d'][k], 
                  reverse=True)
     for i in xrange(N):
-        borplot = plt.axes([borderxl+0.*dx, borderyb+i*dy, 3*dx+2*bordbuff, dy+2*bordbuff])
+        borplot = plt.axes([borderxl+0.*dx+bordbuff/2., borderyb+i*dy+bordbuff/2., 3*dx+bordbuff, dy+bordbuff])
         implot = plt.axes([borderxl+2.*dx+bordbuff, borderyb+i*dy+bordbuff, dx, dy])
         errplot = plt.axes([borderxl+1.*dx+bordbuff, borderyb+i*dy+bordbuff, dx, dy])
         cosplot = plt.axes([borderxl+0.*dx+bordbuff, borderyb+i*dy+bordbuff, dx, dy])
@@ -409,6 +409,7 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
         rec = borplot.add_patch(rec)
         borplot.set_xticks([])
         borplot.set_yticks([]) 
+        borplot.axis('off')
         mn = biweight_location(datakeep['im'][ind[i]])
         st = np.sqrt(biweight_midvariance(datakeep['im'][ind[i]]))
         vmin = mn - 5*st
