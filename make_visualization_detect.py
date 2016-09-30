@@ -384,12 +384,13 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
         norm = plt.Normalize()
         colors = plt.cm.viridis(norm(np.arange(len(datakeep['ra'])+2)))
     N = len(datakeep['xi'])
+    bordbuff = 0.01
     borderxl = 0.05
     borderxr = 0.15
     borderyb = 0.05
     borderyt = 0.15
-    dx = (1. - borderxl - borderxr) / 3.
-    dy = (1. - borderyb - borderyt) / N
+    dx = (1. - borderxl - borderxr - 2*bordbuff) / 3.
+    dy = (1. - borderyb - borderyt - 2*N*bordbuff) / N
     Y = (yw / dy) / (xw / dx) * 5.
 
     fig = plt.figure(figsize=(5,Y))
@@ -397,13 +398,13 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
     ind = sorted(range(len(datakeep['d'])), key=lambda k: datakeep['d'][k], 
                  reverse=True)
     for i in xrange(N):
-        borplot = plt.axes([borderxl+0.*dx, borderyb+i*dy, 3*dx, dy])
-        implot = plt.axes([borderxl+2.*dx, borderyb+i*dy, dx, dy])
-        errplot = plt.axes([borderxl+1.*dx, borderyb+i*dy, dx, dy])
-        cosplot = plt.axes([borderxl+0.*dx, borderyb+i*dy, dx, dy])
+        borplot = plt.axes([borderxl+0.*dx, borderyb+i*dy, 3*dx+2*bordbuff, dy+2*bordbuff])
+        implot = plt.axes([borderxl+2.*dx+bordbuff, borderyb+i*dy+bordbuff, dx, dy])
+        errplot = plt.axes([borderxl+1.*dx+bordbuff, borderyb+i*dy+bordbuff, dx, dy])
+        cosplot = plt.axes([borderxl+0.*dx+bordbuff, borderyb+i*dy+bordbuff, dx, dy])
         autoAxis = borplot.axis()
-        rec = plt.Rectangle((autoAxis[0]-.03,autoAxis[2]+.03),(autoAxis[1]-autoAxis[0])*1.06,
-                            (autoAxis[3]-autoAxis[2])*1.06, fill=False, lw=3, 
+        rec = plt.Rectangle((autoAxis[0],autoAxis[2]),(autoAxis[1]-autoAxis[0]),
+                            (autoAxis[3]-autoAxis[2]), fill=False, lw=3, 
                             color = colors[i,0:3], zorder=1)
         rec = borplot.add_patch(rec)
         borplot.set_xticks([])
