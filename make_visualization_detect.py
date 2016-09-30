@@ -397,14 +397,13 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
     ind = sorted(range(len(datakeep['d'])), key=lambda k: datakeep['d'][k], 
                  reverse=True)
     for i in xrange(N):
+        borplot = plt.axes([borderxl+0.*dx, borderyb+i*dy, 3*dx, dy])
         implot = plt.axes([borderxl+2.*dx, borderyb+i*dy, dx, dy])
         errplot = plt.axes([borderxl+1.*dx, borderyb+i*dy, dx, dy])
         cosplot = plt.axes([borderxl+0.*dx, borderyb+i*dy, dx, dy])
-        borplot = plt.axes([borderxl+0.*dx, borderyb+i*dy, 3*dx, dy])
         autoAxis = borplot.axis()
-        print(autoAxis)
-        rec = plt.Rectangle((autoAxis[0],autoAxis[2]),(autoAxis[1]-autoAxis[0]),
-                            (autoAxis[3]-autoAxis[2]), fill=False, lw=3, 
+        rec = plt.Rectangle((autoAxis[0]-.03,autoAxis[2]+.03),(autoAxis[1]-autoAxis[0])*1.06,
+                            (autoAxis[3]-autoAxis[2])*1.06, fill=False, lw=3, 
                             color = colors[i,0:3], zorder=1)
         rec = borplot.add_patch(rec)
         borplot.set_xticks([])
