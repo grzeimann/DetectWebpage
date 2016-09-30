@@ -13,6 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os.path as op
 import os
+import time
 import textwrap
 import CreateWebpage as CW
 from collections import OrderedDict
@@ -537,6 +538,8 @@ def main():
                                                          np.float)})
                 
                 for i in xrange(len(Cat['XS'])):
+                    if args.debug:
+                        t1 = time.time()
                     x = Cat['XS'][i]
                     y = Cat['YS'][i]
                     sn = Cat['sigma'][i]
@@ -592,12 +595,10 @@ def main():
                                     datakeep['yh'].append(yh)
                                     datakeep['d'].append(d[l])
                                     datakeep['sn'].append(sn)
-                                    if args.debug:
-                                        Di.basename[dither]
                                     dir_fn = op.dirname(Di.basename[dither])
                                     base_fn = op.basename(Di.basename[dither])
-                                    if args.debug:
-                                        print(xi[0],yi[0],base_fn+'_'+side+'.fits')
+                                    #if args.debug:
+                                    #    print(xi[0],yi[0],base_fn+'_'+side+'.fits')
                                     im_fn = op.join(args.folder, 'c'+specid, op.join(
                                                      dir_fn, base_fn+'_'+side+'.fits'))
                                     err_fn = op.join(args.folder, 'c'+specid, op.join(
@@ -623,21 +624,35 @@ def main():
                                         Fe_indh = np.searchsorted(wave,Cat['l'][i]+ww,side='right')
                                         datakeep['spec'].append(FE[l,Fe_indl:(Fe_indh+1)])
                                         datakeep['specwave'].append(wave[Fe_indl:(Fe_indh+1)])
-
+                        if args.debug:
+                            t2 = time.time()
+                            print("Time Taken Building Source Dictionary: %0.2f" %(t2-t1))
+                            t1 = time.time()
                         outfile_2d = ('images/image2d_%s_specid_%s_object_%i_%i.png' 
                                     % (op.basename(args.folder), specid, Cat['NR'][i], 
                                        Cat['ID'][i]))
                         build_2d_image(datakeep, outfile_2d, debug=args.debug)
+                        if args.debug:
+                            t2 = time.time()
+                            print("Time Taken Making 2d Image: %0.2f" %(t2-t1))
+                            t1 = time.time()
                         outfile_spec = ('images/imagespec_%s_specid_%s_object_%i_%i.png' 
                                     % (op.basename(args.folder), specid, Cat['NR'][i],
                                        Cat['ID'][i]))
                         build_spec_image(datakeep, outfile_spec, 
-                                         cwave=Cat['l'][i], debug=args.debug)        
+                                         cwave=Cat['l'][i], debug=args.debug)  
+                        if args.debug:
+                            t2 = time.time()
+                            print("Time Taken Making Spectra Plot: %0.2f" %(t2-t1))
+                            t1 = time.time()
                         outfile_cut = ('images/imagecut_%s_specid_%s_object_%i_%i.png' 
                                     % (op.basename(args.folder), specid, Cat['NR'][i], 
                                        Cat['ID'][i]))
                         make_image_cutout(datakeep, data, wcs, ras, decs, 
                                           outfile_cut, debug=args.debug)
+                        if args.debug:
+                            t2 = time.time()
+                            print("Time Taken Making Image Cutout: %0.2f" %(t2-t1))
                         dict_web = OrderedDict()
                         dict_web['Number_1'] = int(specid)
                         dict_web['Number_2'] = int(Cat['NR'][i])
