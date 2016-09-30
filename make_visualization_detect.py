@@ -335,8 +335,8 @@ def build_spec_image(datakeep, outfile, cwave, dwave=1.0, cmap=None, debug=False
     for i in xrange(N):
         specplot.errorbar(datakeep['specwave'][i], datakeep['spec'][i], 
                           yerr = datakeep['spece'][i],fmt='o',marker='o',
-                          ms=8, mec=[1.0,0.45,0.48], mew=10, capsize=0,
-                          mfc=[1.0,0.0,0.0])
+                          ms=8, mec=[1.0,0.45,0.48], ecolor=[1.0,0.45,0.48],
+                          mew=1, capsize=0, elinewidht=3, mfc=[1.0,0.0,0.0])
         w1 = np.interp(datakeep['d'][i],r,w)
         F+=(np.interp(bigwave,datakeep['specwave'][i], datakeep['spec'][i])*w1)
         W+=w1
