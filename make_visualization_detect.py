@@ -352,7 +352,7 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
         cmap = plt.get_cmap('gray_r')
     if not cmap2:
         norm = plt.Normalize()
-        colors = plt.cm.viridis(norm(np.arange(len(datakeep['ra']))))
+        colors = plt.cm.viridis_r(norm(np.arange(len(datakeep['ra'])+2)))
     pixsize_x = np.sqrt(wcs.wcs.cd[0,0]**2 + wcs.wcs.cd[0,1]**2)*3600. 
     pixsize_y = np.sqrt(wcs.wcs.cd[1,0]**2 + wcs.wcs.cd[1,1]**2)*3600. 
     sz = size * pixsize_x
@@ -364,7 +364,7 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
     xc, yc = skycoord_to_pixel(position, wcs=cutout.wcs)
     plt.scatter(0., 0.,marker='x',c='r',s=35)
     circle = plt.Circle((0., 0.), radius=2., fc='none', 
-                            ec='r', zorder=2, alpha=0.6)
+                            ec='r', zorder=2, alpha=1.0)
     plt.gca().add_patch(circle)
     print(colors)
     for i in xrange(len(datakeep['ra'])):
@@ -383,7 +383,7 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
         cmap = plt.get_cmap('gray_r')
     if not cmap2:
         norm = plt.Normalize()
-        colors = plt.cm.viridis(norm(np.arange(len(datakeep['ra']))))
+        colors = plt.cm.viridis_r(norm(np.arange(len(datakeep['ra'])+2)))
     N = len(datakeep['xi'])
     borderxl = 0.05
     borderxr = 0.15
@@ -402,6 +402,13 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
         errplot = plt.axes([borderxl+1.*dx, borderyb+i*dy, dx, dy])
         cosplot = plt.axes([borderxl+0.*dx, borderyb+i*dy, dx, dy])
         borplot = plt.axes([borderxl+0.*dx, borderyb+i*dy, 3*dx, dy])
+        autoAxis = borplot.axis()
+        rec = plt.Rectangle((autoAxis[0],autoAxis[2]),(autoAxis[1]-autoAxis[0]),
+                            (autoAxis[3]-autoAxis[2]), fill=False, lw=3, 
+                            color = colors[i,0:3], zorder=1)
+        rec = borplot.add_patch(rec)
+        borplot.set_xticks([])
+        borplot.set_yticks([]) 
         mn = biweight_location(datakeep['im'][ind[i]])
         st = np.sqrt(biweight_midvariance(datakeep['im'][ind[i]]))
         vmin = mn - 5*st
@@ -467,11 +474,7 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
             cosplot.text(0.5,.85,'Mask',
                     transform=cosplot.transAxes,fontsize=8,color='b',
                     verticalalignment='bottom', horizontalalignment='center') 
-        autoAxis = borplot.axis()
-        rec = plt.Rectangle((autoAxis[0],autoAxis[2]),(autoAxis[1]-autoAxis[0]),
-                            (autoAxis[3]-autoAxis[2]), fill=False, lw=2, 
-                            color = colors[i,0:3], zorder=1)
-        rec = borplot.add_patch(rec)
+      
     fig.savefig(outfile,dpi=150)
     plt.close(fig)
 
