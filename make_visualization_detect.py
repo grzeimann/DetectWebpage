@@ -236,6 +236,9 @@ def parse_args(argv=None):
                         help='''rotation''', 
                         default=None)
 
+    parser.add_argument("--goodsn", help='''Goods-N?''',
+                        action="count", default=0)   
+
     parser.add_argument("--debug", help='''Debug''',
                         action="count", default=0)   
                                                                          
@@ -494,7 +497,11 @@ def main():
     non_sortable_cols = [3,4]
     fplane = FPlane(fplane_file)
     tp = TP(args.ra, args.dec, args.rot)
-    image_fn = pick_image(args.ra, args.dec)
+    if args.goodsn:
+        image_fn='/work/03564/stevenf/maverick/GOODSN/gn_acs_old_f435w_060mas_v2_drz.fits'
+    else:
+        image_fn = pick_image(args.ra, args.dec)
+
     wcs = WCS(image_fn)
     data = fits.open(image_fn)[0].data
     if not op.exists('images'):
