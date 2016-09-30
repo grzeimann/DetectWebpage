@@ -98,7 +98,7 @@ CAM_IFU_DICT = {'004':'051',
 # Default set of spectrographs for reduction
 SPECID = ["004","008","012","013","016","017","020","024","025","027","032",
           "037","038","041","047","051"]
-SPECID = ["051"]
+#SPECID = ["051"]
 SIDE = ["L", "R"]
 
 columnnames = ["SPECID", "NR", "ID", "Source_Info", "2D Plots","Spec Plots","Cutouts"]
