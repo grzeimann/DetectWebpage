@@ -350,7 +350,7 @@ def build_spec_image(datakeep, outfile, cwave, dwave=1.0, cmap=None, debug=False
 
 
 def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
-                      cmap=None, sz=10., debug=False):
+                      cmap=None, sz=10., debug=False, args=None):
     if not cmap:
         # Default cmap is gray
         cmap = plt.get_cmap('gray_r')
@@ -365,7 +365,13 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
     position = SkyCoord(ras, decs, unit="deg", frame='fk5')   
     cutout = Cutout2D(data, position, (size,size), wcs=wcs)
     fig = plt.figure(figsize=(4,4))
-    plt.imshow(cutout.data,origin='lower',interpolation='nearest',vmin=-10,vmax=50, 
+    if args.goodsn:
+        vmin = -0.02
+        vmax = 0.08
+    else:
+        vmin = -10
+        vmax = 50
+    plt.imshow(cutout.data,origin='lower',interpolation='nearest',vmin=vmin,vmax=vmax, 
                cmap=cmap, extent=[-sz/2.,sz/2.,-sz/2.,sz/2.])
     xc, yc = skycoord_to_pixel(position, wcs=cutout.wcs)
     plt.scatter(0., 0.,marker='x',c='r',s=35)
@@ -661,7 +667,7 @@ def main():
                                     % (op.basename(args.folder), specid, Cat['NR'][i], 
                                        Cat['ID'][i]))
                         make_image_cutout(datakeep, data, wcs, ras, decs, 
-                                          outfile_cut, debug=args.debug)
+                                          outfile_cut, debug=args.debug, args=args)
                         if args.debug:
                             t2 = time.time()
                             print("Time Taken Making Image Cutout: %0.2f" %(t2-t1))
