@@ -351,18 +351,19 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
         # Default cmap is gray
         cmap = plt.get_cmap('gray_r')
     if not cmap2:
-        cmap2 = plt.get_cmap('viridis')
-        colors = cmap2(np.arange(len(datakeep['ra'])))
+        norm = plt.Normalize()
+        colors = plt.cm.viridis(norm(np.arange(len(datakeep['ra']))))
     pixsize_x = np.sqrt(wcs.wcs.cd[0,0]**2 + wcs.wcs.cd[0,1]**2)*3600. 
     pixsize_y = np.sqrt(wcs.wcs.cd[1,0]**2 + wcs.wcs.cd[1,1]**2)*3600. 
+    sz = size * pixsize_x
     position = SkyCoord(ras, decs, unit="deg", frame='fk5')   
     cutout = Cutout2D(data, position, (size,size), wcs=wcs)
     fig = plt.figure(figsize=(4,4))
     plt.imshow(cutout.data,origin='lower',interpolation='nearest',vmin=-5,vmax=50, 
-               cmap=cmap, extent=[-size/2.,size/2.,-size/2.,size/2.])
+               cmap=cmap, extent=[-sz/2.,sz/2.,-sz/2.,sz/2.])
     xc, yc = skycoord_to_pixel(position, wcs=cutout.wcs)
     plt.scatter(0., 0.,marker='x',c='r',s=35)
-    circle = plt.Circle((0., 0.), radius=2./pixsize_x, fc='none', 
+    circle = plt.Circle((0., 0.), radius=2., fc='none', 
                             ec='r', zorder=2, alpha=0.6)
     plt.gca().add_patch(circle)
     print(colors)
@@ -370,7 +371,7 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
         xf,yf = skycoord_to_pixel(
              SkyCoord(datakeep['ra'][i],datakeep['dec'][i], unit="deg", frame='fk5'), 
              wcs=cutout.wcs)
-        circle = plt.Circle((xf-xc, yf-yc), radius=.75/pixsize_x, fc='none', 
+        circle = plt.Circle(((xf-xc)*pixsize_x, (yf-yc)*pixsize_x), radius=.75, fc='none', 
                             ec=colors[i,0:3], zorder=2, alpha=0.6)
         plt.gca().add_patch(circle)
     fig.savefig(outfile,dpi=150)
@@ -381,8 +382,8 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
         # Default cmap is gray
         cmap = plt.get_cmap('gray_r')
     if not cmap2:
-        cmap2 = plt.get_cmap('viridis')
-        colors = cmap2(np.arange(len(datakeep['ra'])))
+        norm = plt.Normalize()
+        colors = plt.cm.viridis(norm(np.arange(len(datakeep['ra']))))
     N = len(datakeep['xi'])
     borderxl = 0.05
     borderxr = 0.15
@@ -467,9 +468,9 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
                     transform=cosplot.transAxes,fontsize=8,color='b',
                     verticalalignment='bottom', horizontalalignment='center') 
         autoAxis = borplot.axis()
-        rec = plt.Rectangle((autoAxis[0],autoAxis[2]),(autoAxis[1]-autoAxis[0]),
+        rec = borplot.Rectangle((autoAxis[0],autoAxis[2]),(autoAxis[1]-autoAxis[0]),
                             (autoAxis[3]-autoAxis[2]), fill=False, lw=2, 
-                            color = colors[i,0:3])
+                            color = colors[i,0:3], zorder=1)
         rec = borplot.add_patch(rec)
     fig.savefig(outfile,dpi=150)
     plt.close(fig)
