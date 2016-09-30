@@ -405,7 +405,7 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
         autoAxis = borplot.axis()
         rec = plt.Rectangle((autoAxis[0]+bordbuff/2.,autoAxis[2]+bordbuff/2.),(autoAxis[1]-autoAxis[0])*(1.-bordbuff),
                             (autoAxis[3]-autoAxis[2])*(1.-bordbuff), fill=False, lw=3, 
-                            color = colors[i,0:3], zorder=1)
+                            color = colors[ind[i],0:3], zorder=1)
         rec = borplot.add_patch(rec)
         borplot.set_xticks([])
         borplot.set_yticks([]) 
@@ -428,6 +428,7 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
         implot.set_xticks([])
         implot.set_yticks([])
         implot.axis(ext)
+        implot.axis('off')
         errplot.imshow(datakeep['err'][ind[i]], 
                       origin="lower", cmap=cmap, 
                       interpolation="nearest",vmin=vmin,vmax=vmax,
@@ -437,6 +438,7 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
         errplot.set_xticks([])
         errplot.set_yticks([])
         errplot.axis(ext)
+        errplot.axis('off')
         a = datakeep['cos'][ind[i]]
         a = np.ma.masked_where(a==0, a)
         cmap1 = cmap
@@ -450,6 +452,7 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
         cosplot.set_xticks([])
         cosplot.set_yticks([])
         cosplot.axis(ext)
+        cosplot.axis('off')
         xi = datakeep['xi'][ind[i]]
         yi = datakeep['yi'][ind[i]]
         xl = int(np.round(xi-ext[0]-res[0]/2.))
@@ -558,16 +561,16 @@ def main():
                     if sn>sn_cut:
                         for side in SIDE:
                             for dither in xrange(len(Di.dx)):
-                                dx = x-IFU.xifu[side]+Di.dx[dither]
-                                dy = y-IFU.yifu[side]+Di.dy[dither]
+                                dx = x-IFU.xifu[side]-Di.dx[dither]
+                                dy = y-IFU.yifu[side]-Di.dy[dither]
                                 d = np.sqrt(dx**2 + dy**2)
                                 loc = np.where(d<dist_thresh)[0]
                                 for l in loc:
                                     f0 = D[side].get_reference_f(l+1)
                                     xi = D[side].map_wf_x(Cat['l'][i],f0)
                                     yi = D[side].map_wf_y(Cat['l'][i],f0)
-                                    xfiber = IFU.xifu[side][l]-Di.dx[dither]
-                                    yfiber = IFU.yifu[side][l]-Di.dy[dither]
+                                    xfiber = IFU.xifu[side][l]+Di.dx[dither]
+                                    yfiber = IFU.yifu[side][l]+Di.dy[dither]
                                     xfiber += ifuy
                                     yfiber += ifux
                                     ra, dec = tp.xy2raDec(xfiber, yfiber)
