@@ -352,7 +352,7 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
         cmap = plt.get_cmap('gray_r')
     if not cmap2:
         norm = plt.Normalize()
-        colors = plt.cm.viridis_r(norm(np.arange(len(datakeep['ra'])+2)))
+        colors = plt.cm.viridis(norm(np.arange(len(datakeep['ra'])+2)))
     pixsize_x = np.sqrt(wcs.wcs.cd[0,0]**2 + wcs.wcs.cd[0,1]**2)*3600. 
     pixsize_y = np.sqrt(wcs.wcs.cd[1,0]**2 + wcs.wcs.cd[1,1]**2)*3600. 
     sz = size * pixsize_x
@@ -366,7 +366,6 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
     circle = plt.Circle((0., 0.), radius=2., fc='none', 
                             ec='r', zorder=2, alpha=1.0)
     plt.gca().add_patch(circle)
-    print(colors)
     for i in xrange(len(datakeep['ra'])):
         xf,yf = skycoord_to_pixel(
              SkyCoord(datakeep['ra'][i],datakeep['dec'][i], unit="deg", frame='fk5'), 
@@ -383,7 +382,7 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
         cmap = plt.get_cmap('gray_r')
     if not cmap2:
         norm = plt.Normalize()
-        colors = plt.cm.viridis_r(norm(np.arange(len(datakeep['ra'])+2)))
+        colors = plt.cm.viridis(norm(np.arange(len(datakeep['ra'])+2)))
     N = len(datakeep['xi'])
     borderxl = 0.05
     borderxr = 0.15
@@ -403,6 +402,7 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
         cosplot = plt.axes([borderxl+0.*dx, borderyb+i*dy, dx, dy])
         borplot = plt.axes([borderxl+0.*dx, borderyb+i*dy, 3*dx, dy])
         autoAxis = borplot.axis()
+        print(autoAxis)
         rec = plt.Rectangle((autoAxis[0],autoAxis[2]),(autoAxis[1]-autoAxis[0]),
                             (autoAxis[3]-autoAxis[2]), fill=False, lw=3, 
                             color = colors[i,0:3], zorder=1)
