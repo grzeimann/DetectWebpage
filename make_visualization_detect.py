@@ -346,7 +346,7 @@ def build_spec_image(datakeep, outfile, cwave, dwave=1.0, cmap=None, debug=False
 
 
 def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
-                      cmap=None, debug=False):
+                      cmap=None, size=50., debug=False):
     if not cmap:
         # Default cmap is gray
         cmap = plt.get_cmap('gray_r')
@@ -356,15 +356,22 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
     pixsize_x = np.sqrt(wcs.wcs.cd[0,0]**2 + wcs.wcs.cd[0,1]**2)*3600. 
     pixsize_y = np.sqrt(wcs.wcs.cd[1,0]**2 + wcs.wcs.cd[1,1]**2)*3600. 
     position = SkyCoord(ras, decs, unit="deg", frame='fk5')   
-    cutout = Cutout2D(data, position, (50,50), wcs=wcs)
+    cutout = Cutout2D(data, position, (size,size), wcs=wcs)
     fig = plt.figure(figsize=(5,5))
     plt.imshow(cutout.data,origin='lower',interpolation='nearest',vmin=-5,vmax=50, 
-               cmap=cmap)
+               cmap=cmap, extent=[-size/2.,size/2.,-size/2.,size/2.])
+    xc, yc = skycoord_to_pixel(position, unit="deg", frame='fk5', 
+                               wcs=cutout.wcs)
+    plt.scatter(0., 0.,marker='x',c='r',s=35)
+    circle = plt.Circle((0., 0.), radius=2./pixsize_x, fc='none', 
+                            ec='r', zorder=2, alpha=0.6)
+    plt.gca().add_patch(circle)
+    print(colors)
     for i in xrange(len(datakeep['ra'])):
         xf,yf = skycoord_to_pixel(
              SkyCoord(datakeep['ra'][i],datakeep['dec'][i], unit="deg", frame='fk5'), 
              wcs=cutout.wcs)
-        circle = plt.Circle((xf, yf), radius=.75/pixsize_x, fc='none', 
+        circle = plt.Circle((xf-xc, yf-yc), radius=.75/pixsize_x, fc='none', 
                             ec=colors[i,0:3], zorder=2, alpha=0.6)
         plt.gca().add_patch(circle)
     fig.savefig(outfile,dpi=150)
@@ -394,6 +401,7 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
         implot = plt.axes([borderxl+2.*dx, borderyb+i*dy, dx, dy])
         errplot = plt.axes([borderxl+1.*dx, borderyb+i*dy, dx, dy])
         cosplot = plt.axes([borderxl+0.*dx, borderyb+i*dy, dx, dy])
+        borplot = plt.axes([borderxl+0.*dx, borderyb+i*dy, 3*dx, dy])
         mn = biweight_location(datakeep['im'][ind[i]])
         st = np.sqrt(biweight_midvariance(datakeep['im'][ind[i]]))
         vmin = mn - 5*st
@@ -458,7 +466,12 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
                     verticalalignment='bottom', horizontalalignment='center')
             cosplot.text(0.5,.85,'Mask',
                     transform=cosplot.transAxes,fontsize=8,color='b',
-                    verticalalignment='bottom', horizontalalignment='center')                    
+                    verticalalignment='bottom', horizontalalignment='center') 
+        autoAxis = borplot.axis()
+        rec = plt.Rectangle((autoAxis[0],autoAxis[2]),(autoAxis[1]-autoAxis[0]),
+                            (autoAxis[3]-autoAxis[2]), fill=False, lw=2, 
+                            color = colors[i,0:3])
+        rec = borplot.add_patch(rec)
     fig.savefig(outfile,dpi=150)
     plt.close(fig)
 
