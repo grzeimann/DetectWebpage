@@ -400,7 +400,7 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
     ind = sorted(range(len(datakeep['d'])), key=lambda k: datakeep['d'][k], 
                  reverse=True)
     for i in xrange(N):
-        borplot = plt.axes([borderxl+0.*dx+bordbuff/2., borderyb+i*dy+bordbuff/2., 3*dx+bordbuff, dy+bordbuff])
+        borplot = plt.axes([borderxl+0.*dx, borderyb+i*dy, 3*dx, dy])
         implot = plt.axes([borderxl+2.*dx+bordbuff, borderyb+i*dy+bordbuff, dx-2*bordbuff/3., dy-2*bordbuff])
         errplot = plt.axes([borderxl+1.*dx+bordbuff, borderyb+i*dy+bordbuff, dx-2*bordbuff/3., dy-2*bordbuff])
         cosplot = plt.axes([borderxl+0.*dx+bordbuff, borderyb+i*dy+bordbuff, dx-2*bordbuff/3., dy-2*bordbuff])
