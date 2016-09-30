@@ -342,9 +342,9 @@ def build_spec_image(datakeep, outfile, cwave, dwave=1.0, cmap=None, debug=False
         mn = np.min([mn,np.min(datakeep['spec'][i])])
         mx = np.max([mx,np.max(datakeep['spec'][i])])
     F /= W
-    specplot.plot(bigwave, F, c='b')
+    specplot.step(bigwave, F, c='b',where='mid')
     ran = mx - mn
-    specplot.plot([cwave,cwave],[mn-ran*rm, mn+ran*(1+rm)])
+    specplot.plot([cwave,cwave],[mn-ran*rm, mn+ran*(1+rm)],c=[0.3,0.3,0.3])
     specplot.axis([cwave-ww, cwave+ww, mn-ran*rm, mn+ran*(1+rm)])
     fig.savefig(outfile,dpi=150)
     plt.close(fig)
