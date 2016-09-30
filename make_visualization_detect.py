@@ -605,8 +605,8 @@ def main():
                                     datakeep['sn'].append(sn)
                                     dir_fn = op.dirname(Di.basename[dither])
                                     base_fn = op.basename(Di.basename[dither])
-                                    #if args.debug:
-                                    #    print(xi[0],yi[0],base_fn+'_'+side+'.fits')
+                                    if args.debug:
+                                        print(xi[0],yi[0],base_fn+'_'+side+'.fits')
                                     im_fn = op.join(args.folder, 'c'+specid, op.join(
                                                      dir_fn, base_fn+'_'+side+'.fits'))
                                     err_fn = op.join(args.folder, 'c'+specid, op.join(
