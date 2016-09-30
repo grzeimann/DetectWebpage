@@ -393,7 +393,7 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
     dy = (1. - borderyb - borderyt - 2*N*bordbuff) / N
     Y = (yw / dy) / (xw / dx) * 5.
 
-    fig = plt.figure(figsize=(5,Y))
+    fig = plt.figure(figsize=(5,Y),frameon=False)
 
     ind = sorted(range(len(datakeep['d'])), key=lambda k: datakeep['d'][k], 
                  reverse=True)
@@ -403,8 +403,8 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
         errplot = plt.axes([borderxl+1.*dx+bordbuff, borderyb+i*dy+bordbuff, dx, dy])
         cosplot = plt.axes([borderxl+0.*dx+bordbuff, borderyb+i*dy+bordbuff, dx, dy])
         autoAxis = borplot.axis()
-        rec = plt.Rectangle((autoAxis[0],autoAxis[2]),(autoAxis[1]-autoAxis[0]),
-                            (autoAxis[3]-autoAxis[2]), fill=False, lw=3, 
+        rec = plt.Rectangle((autoAxis[0]+bordbuff/2.,autoAxis[2]+bordbuff/2.),(autoAxis[1]-autoAxis[0])*(1.-bordbuff),
+                            (autoAxis[3]-autoAxis[2])*(1.-bordbuff), fill=False, lw=3, 
                             color = colors[i,0:3], zorder=1)
         rec = borplot.add_patch(rec)
         borplot.set_xticks([])
