@@ -318,10 +318,14 @@ def get_w_as_r(seeing, gridsize, rstep, rmax, profile_name='moffat'):
     phot_table = aperture_photometry(Z, apertures)
     return r, np.array(phot_table['aperture_sum'])
     
-def build_spec_image(datakeep, outfile, cwave, dwave=1.0, cmap=None, debug=False):
+def build_spec_image(datakeep, outfile, cwave, dwave=1.0, cmap=None, 
+                     cmap2=None, debug=False):
     if not cmap:
         # Default cmap is gray
         cmap = plt.get_cmap('gray_r')
+    if not cmap2:
+        norm = plt.Normalize()
+        colors = plt.cm.viridis_r(norm(np.arange(len(datakeep['ra'])+2)))
     N = len(datakeep['xi'])
     rm = 0.2
     fig = plt.figure(figsize=(5,3))
@@ -332,16 +336,18 @@ def build_spec_image(datakeep, outfile, cwave, dwave=1.0, cmap=None, debug=False
     mn = 100.0
     mx = 0.0
     W = 0.0
+    ind = sorted(range(len(datakeep['d'])), key=lambda k: datakeep['d'][k], 
+                 reverse=True)
     for i in xrange(N):
-        specplot.errorbar(datakeep['specwave'][i], datakeep['spec'][i], 
-                          yerr = datakeep['spece'][i],fmt='o',marker='o',
-                          ms=4, mec=[1.0,0.45,0.48], ecolor=[1.0,0.45,0.48],
-                          mew=1, capsize=0, elinewidth=2, mfc=[1.0,0.0,0.0])
-        w1 = np.interp(datakeep['d'][i],r,w)
-        F+=(np.interp(bigwave,datakeep['specwave'][i], datakeep['spec'][i])*w1)
+        specplot.errorbar(datakeep['specwave'][ind[i]], datakeep['spec'][ind[i]], 
+                          yerr = datakeep['spece'][ind[i]],fmt='o',marker='o',
+                          ms=4, mec=colors[i,0:3], ecolor=colors[i,0:3],
+                          mew=1, capsize=0, elinewidth=2, mfc=[0.7,0.7,0.7])
+        w1 = np.interp(datakeep['d'][ind[i]],r,w)
+        F+=(np.interp(bigwave,datakeep['specwave'][ind[i]], datakeep['spec'][ind[i]])*w1)
         W+=w1
-        mn = np.min([mn,np.min(datakeep['spec'][i])])
-        mx = np.max([mx,np.max(datakeep['spec'][i])])
+        mn = np.min([mn,np.min(datakeep['spec'][ind[i]])])
+        mx = np.max([mx,np.max(datakeep['spec'][ind[i]])])
     F /= W
     specplot.step(bigwave, F, c='b',where='mid',lw=2)
     ran = mx - mn
