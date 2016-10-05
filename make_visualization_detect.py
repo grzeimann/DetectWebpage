@@ -99,7 +99,7 @@ CAM_IFU_DICT = {'004':'051',
 # Default set of spectrographs for reduction
 SPECID = ["004","008","012","013","016","017","020","024","025","027","032",
           "037","038","041","047","051"]
-#SPECID = ["051"]
+SPECID = ["016"]
 SIDE = ["L", "R"]
 
 columnnames = ["SPECID", "NR", "ID", "Source_Info", "2D Plots","Spec Plots","Cutouts"]
@@ -640,7 +640,7 @@ def main():
                                         I = fits.open(im_fn)[0].data.ravel()
                                         s_ind = np.argsort(I)[::-1]
                                         len_s = len(s_ind)
-                                        s_rank = np.indices((len_s,))
+                                        s_rank = np.arange(len_s)
                                         p = np.polyfit(s_rank-len_s/2,I[s_ind],1)
                                         z1 = I[s_ind[len_s]]+p[0]*(1-len_s/2)
                                         z2 = I[s_ind[len_s]]+p[0]*(len_s-len_s/2)
