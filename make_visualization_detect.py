@@ -641,7 +641,7 @@ def main():
                                         s_ind = np.argsort(I)[::-1]
                                         len_s = len(s_ind)
                                         s_rank = np.indices((len_s,))
-                                        p = np.polyfit(s_rank-len_s/2,I[s_ind])
+                                        p = np.polyfit(s_rank-len_s/2,I[s_ind],1)
                                         z1 = I[s_ind[len_s]]+p[0]*(1-len_s/2)
                                         z2 = I[s_ind[len_s]]+p[0]*(len_s-len_s/2)
                                         print(z1,z2)
