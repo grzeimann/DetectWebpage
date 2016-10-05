@@ -434,16 +434,13 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
         borplot.axis('off')
         mn = biweight_location(datakeep['im'][ind[i]])
         st = np.sqrt(biweight_midvariance(datakeep['im'][ind[i]]))
-        vmin = mn - 5*st
-        vmax = mn + 5*st
-        beta = 1.
         ext = list(np.hstack([datakeep['xl'][ind[i]],datakeep['xh'][ind[i]],
                               datakeep['yl'][ind[i]],datakeep['yh'][ind[i]]]))
         GF = gaussian_filter(datakeep['im'][ind[i]],(2,1))  
         implot.imshow(GF, 
                       origin="lower", cmap=cmap, 
-                      interpolation="nearest",vmin=vmin,
-                      vmax=vmax,
+                      interpolation="nearest",vmin=datakeep['vmin'][ind[i]],
+                      vmax=datakeep['vmax'][ind[i]],
                       extent=ext)
         implot.scatter(datakeep['xi'][ind[i]],datakeep['yi'][ind[i]],
                        marker='x',c='r',s=10)
@@ -467,7 +464,8 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
         cmap1.set_bad(color=[0.2,1.0,0.23])
         cosplot.imshow(a, 
                       origin="lower",cmap=cmap1,
-                      interpolation="nearest",vmin=vmin,vmax=vmax,
+                      interpolation="nearest",vmin=datakeep['vmin'][ind[i]],
+                      vmax=datakeep['vmax'][ind[i]],
                       extent=ext)
         cosplot.scatter(datakeep['xi'][ind[i]],datakeep['yi'][ind[i]],
                        marker='x',c='r',s=10)
@@ -578,6 +576,8 @@ def main():
                     datakeep['dx'] = []
                     datakeep['dy'] = []
                     datakeep['im'] = []
+                    datakeep['vmin'] = []
+                    datakeep['vmax'] = []
                     datakeep['err'] = []
                     datakeep['pix'] = []
                     datakeep['spec'] = []
@@ -637,6 +637,16 @@ def main():
                                     if op.exists(im_fn):
                                         datakeep['im'].append(fits.open(im_fn)[0].data[yl:yh,xl:xh])
                                         datakeep['par'].append(fits.open(im_fn)[0].header['PARANGLE'])
+                                        I = fits.open(im_fn)[0].data.ravel()
+                                        s_ind = np.argsort(I)[::-1]
+                                        len_s = len(s_ind)
+                                        s_rank = np.indices((len_s,))
+                                        p = np.polyfit(s_rank-len_s/2,I[s_ind])
+                                        z1 = I[s_ind[len_s]]+p[0]*(1-len_s/2)
+                                        z2 = I[s_ind[len_s]]+p[0]*(len_s-len_s/2)
+                                        print(z1,z2)
+                                        datakeep['vmin'].append(z1)
+                                        datakeep['vmax'].append(z2)
                                     if op.exists(err_fn):
                                         datakeep['err'].append(fits.open(err_fn)[0].data[yl:yh,xl:xh])
                                     if op.exists(pix_fn):
