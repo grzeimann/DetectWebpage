@@ -103,7 +103,7 @@ SPECID = ["004","008","012","013","016","017","020","024","025","027","032",
 #SPECID = ["051"]
 SIDE = ["L", "R"]
 
-columnnames = ["SPECID", "NR", "ID", "Source_Info", "2D Plots","Spec Plots","Cutouts"]
+columnnames = ["SPECID", "NR", "ID", "S/N", "Source_Info", "2D Plots","Spec Plots","Cutouts"]
 
 class ParseDither():
     """
