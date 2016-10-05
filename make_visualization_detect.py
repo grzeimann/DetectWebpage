@@ -638,6 +638,7 @@ def main():
                                         datakeep['im'].append(fits.open(im_fn)[0].data[yl:yh,xl:xh])
                                         datakeep['par'].append(fits.open(im_fn)[0].header['PARANGLE'])
                                         I = fits.open(im_fn)[0].data.ravel()
+                                        I[np.isnan(I)] = 0.0
                                         s_ind = np.argsort(I)[::-1]
                                         len_s = len(s_ind)
                                         s_rank = np.arange(len_s)
