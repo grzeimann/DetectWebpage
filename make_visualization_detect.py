@@ -639,12 +639,10 @@ def main():
                                         datakeep['par'].append(fits.open(im_fn)[0].header['PARANGLE'])
                                         I = fits.open(im_fn)[0].data.ravel()
                                         I[np.isnan(I)] = 0.0
-                                        s_ind = np.argsort(I)[::-1]
+                                        s_ind = np.argsort(I)
                                         len_s = len(s_ind)
                                         s_rank = np.arange(len_s)
                                         p = np.polyfit(s_rank-len_s/2,I[s_ind],1)
-                                        print(p)
-                                        print(np.sum(np.isnan(I)))
                                         z1 = I[s_ind[len_s/2]]+p[0]*(1-len_s/2)
                                         z2 = I[s_ind[len_s/2]]+p[0]*(len_s-len_s/2)
                                         print(z1,z2)
