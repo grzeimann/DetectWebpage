@@ -31,7 +31,7 @@ from pyhetdex.coordinates.tangent_projection_astropy import TangentPlane as TP
 
 
 dist_thresh = 2. # Fiber Distance
-sn_cut = 4.5 # S/N Cut
+sn_cut = 4.0 # S/N Cut
 xw = 24 # image width in x-dir 
 yw = 10 # image width in y-dir
 res = [3,9]
@@ -100,7 +100,7 @@ CAM_IFU_DICT = {'004':'051',
 # Default set of spectrographs for reduction
 SPECID = ["004","008","012","013","016","017","020","024","025","027","032",
           "037","038","041","047","051"]
-SPECID = ["016"]
+#SPECID = ["051"]
 SIDE = ["L", "R"]
 
 columnnames = ["SPECID", "NR", "ID", "Source_Info", "2D Plots","Spec Plots","Cutouts"]
