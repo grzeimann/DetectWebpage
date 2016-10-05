@@ -31,11 +31,12 @@ from pyhetdex.coordinates.tangent_projection_astropy import TangentPlane as TP
 
 
 dist_thresh = 2. # Fiber Distance
-sn_cut = 4.0 # S/N Cut
+sn_cut = 4.5 # S/N Cut
 xw = 24 # image width in x-dir 
 yw = 10 # image width in y-dir
 res = [3,9]
 ww = xw*1.9 # wavelength width
+contrast = 0.5
 virus_config = '/work/03946/hetdex/maverick/virus_config'
 fplane_file = '/home/00115/gebhardt/fplane.txt' 
 image_dir = '/work/03229/iwold/maverick/fall_field/stack/v2/psf/nano'
@@ -643,9 +644,8 @@ def main():
                                         len_s = len(s_ind)
                                         s_rank = np.arange(len_s)
                                         p = np.polyfit(s_rank-len_s/2,I[s_ind],1)
-                                        z1 = I[s_ind[len_s/2]]+p[0]*(1-len_s/2)
-                                        z2 = I[s_ind[len_s/2]]+p[0]*(len_s-len_s/2)
-                                        print(z1,z2)
+                                        z1 = I[s_ind[len_s/2]]+p[0]*(1-len_s/2)/contrast
+                                        z2 = I[s_ind[len_s/2]]+p[0]*(len_s-len_s/2)/contrast
                                         datakeep['vmin'].append(z1)
                                         datakeep['vmax'].append(z2)
                                     if op.exists(err_fn):
