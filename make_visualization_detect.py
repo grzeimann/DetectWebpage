@@ -534,13 +534,10 @@ def main():
                 print(ifu_fn)
             IFU = IFUCenter(ifu_fn)
             Di = ParseDither(op.join(args.folder, 'c'+specid, args.dither_file))
-            D_L = Distortion(op.join(args.folder, 'c'+specid, 
-                                     Di.deformer[0]+'_L.dist'))
-            D_R = Distortion(op.join(args.folder, 'c'+specid, 
-                                     Di.deformer[0]+'_R.dist'))
             D = {}
-            D[SIDE[0]] = D_L
-            D[SIDE[1]] = D_R
+            for s in SIDE:
+                D[s] = Distortion(op.join(args.folder, 'c'+specid, 
+                                     Di.deformer[0]+'_%s.dist' %s))
             detect_fn = op.join(args.folder, 'c'+specid, 'detect_line.dat')
             if op.exists(detect_fn):
                 Cat = np.loadtxt(detect_fn, dtype={'names': ('NR', 'ID', 'XS', 
@@ -666,47 +663,48 @@ def main():
                                         datakeep['spec'].append(FE[l,Fe_indl:(Fe_indh+1)])
                                         datakeep['spece'].append(FEe[l,Fe_indl:(Fe_indh+1)])
                                         datakeep['specwave'].append(wave[Fe_indl:(Fe_indh+1)])
-                        if args.debug:
-                            t2 = time.time()
-                            print("Time Taken Building Source Dictionary: %0.2f" %(t2-t1))
-                            t1 = time.time()
-                        outfile_2d = ('images/image2d_%s_specid_%s_object_%i_%i.png' 
-                                    % (op.basename(args.folder), specid, Cat['NR'][i], 
-                                       Cat['ID'][i]))
-                        build_2d_image(datakeep, outfile_2d, debug=args.debug)
-                        if args.debug:
-                            t2 = time.time()
-                            print("Time Taken Making 2d Image: %0.2f" %(t2-t1))
-                            t1 = time.time()
-                        outfile_spec = ('images/imagespec_%s_specid_%s_object_%i_%i.png' 
-                                    % (op.basename(args.folder), specid, Cat['NR'][i],
-                                       Cat['ID'][i]))
-                        build_spec_image(datakeep, outfile_spec, 
-                                         cwave=Cat['l'][i], debug=args.debug)  
-                        if args.debug:
-                            t2 = time.time()
-                            print("Time Taken Making Spectra Plot: %0.2f" %(t2-t1))
-                            t1 = time.time()
-                        outfile_cut = ('images/imagecut_%s_specid_%s_object_%i_%i.png' 
-                                    % (op.basename(args.folder), specid, Cat['NR'][i], 
-                                       Cat['ID'][i]))
-                        make_image_cutout(datakeep, data, wcs, ras, decs, 
-                                          outfile_cut, debug=args.debug, args=args)
-                        if args.debug:
-                            t2 = time.time()
-                            print("Time Taken Making Image Cutout: %0.2f" %(t2-t1))
-                        dict_web = OrderedDict()
-                        dict_web['Number_1'] = int(specid)
-                        dict_web['Number_2'] = int(Cat['NR'][i])
-                        dict_web['Number_3'] = int(Cat['ID'][i])
-                        dict_web['Number_4'] = sn
-                        dict_web['Table_1'] = [('S/N: %0.2f' %(sn)),
-                                               ('chi2: %0.2f' %(chi2)),
-                                               ('flux: %0.1f'% (flux))]
-                        dict_web['Image_1'] = outfile_2d
-                        dict_web['Image_2'] = outfile_spec
-                        dict_web['Image_3'] = outfile_cut
-                        CW.CreateWebpage.writeColumn(f_webpage,dict_web)  
+                        if datakeep:
+                            if args.debug:
+                                t2 = time.time()
+                                print("Time Taken Building Source Dictionary: %0.2f" %(t2-t1))
+                                t1 = time.time()
+                            outfile_2d = ('images/image2d_%s_specid_%s_object_%i_%i.png' 
+                                        % (op.basename(args.folder), specid, Cat['NR'][i], 
+                                           Cat['ID'][i]))
+                            build_2d_image(datakeep, outfile_2d, debug=args.debug)
+                            if args.debug:
+                                t2 = time.time()
+                                print("Time Taken Making 2d Image: %0.2f" %(t2-t1))
+                                t1 = time.time()
+                            outfile_spec = ('images/imagespec_%s_specid_%s_object_%i_%i.png' 
+                                        % (op.basename(args.folder), specid, Cat['NR'][i],
+                                           Cat['ID'][i]))
+                            build_spec_image(datakeep, outfile_spec, 
+                                             cwave=Cat['l'][i], debug=args.debug)  
+                            if args.debug:
+                                t2 = time.time()
+                                print("Time Taken Making Spectra Plot: %0.2f" %(t2-t1))
+                                t1 = time.time()
+                            outfile_cut = ('images/imagecut_%s_specid_%s_object_%i_%i.png' 
+                                        % (op.basename(args.folder), specid, Cat['NR'][i], 
+                                           Cat['ID'][i]))
+                            make_image_cutout(datakeep, data, wcs, ras, decs, 
+                                              outfile_cut, debug=args.debug, args=args)
+                            if args.debug:
+                                t2 = time.time()
+                                print("Time Taken Making Image Cutout: %0.2f" %(t2-t1))
+                            dict_web = OrderedDict()
+                            dict_web['Number_1'] = int(specid)
+                            dict_web['Number_2'] = int(Cat['NR'][i])
+                            dict_web['Number_3'] = int(Cat['ID'][i])
+                            dict_web['Number_4'] = sn
+                            dict_web['Table_1'] = [('S/N: %0.2f' %(sn)),
+                                                   ('chi2: %0.2f' %(chi2)),
+                                                   ('flux: %0.1f'% (flux))]
+                            dict_web['Image_1'] = outfile_2d
+                            dict_web['Image_2'] = outfile_spec
+                            dict_web['Image_3'] = outfile_cut
+                            CW.CreateWebpage.writeColumn(f_webpage,dict_web)  
         CW.CreateWebpage.writeEnding(f_webpage)     
        
     
