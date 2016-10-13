@@ -103,7 +103,7 @@ SPECID = ["004","008","012","013","016","017","020","024","025","027","032",
 #SPECID = ["051"]
 SIDE = ["L", "R"]
 
-columnnames = ["SPECID", "NR", "ID", "S/N", "Source_Info", "2D Plots","Spec Plots","Cutouts"]
+columnnames = ["SPECID", "NR", "ID", "S/N", "RA", "Dec", "Source_Info", "2D Plots","Spec Plots","Cutouts"]
 
 class ParseDither():
     """
@@ -507,7 +507,7 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
 def main():
     args = parse_args()
     webpage_name = 'Detect Visualization_' + op.basename(args.folder)
-    non_sortable_cols = [5,6,7]
+    non_sortable_cols = [7,8,9]
     fplane = FPlane(fplane_file)
     tp = TP(args.ra, args.dec, args.rot)
     if args.goodsn:
@@ -698,6 +698,8 @@ def main():
                             dict_web['Number_2'] = int(Cat['NR'][i])
                             dict_web['Number_3'] = int(Cat['ID'][i])
                             dict_web['Number_4'] = sn
+                            dict_web['Number_5'] = ras
+                            dict_web['Number_6'] = decs
                             dict_web['Table_1'] = [('S/N: %0.2f' %(sn)),
                                                    ('chi2: %0.2f' %(chi2)),
                                                    ('flux: %0.1f'% (flux))]
