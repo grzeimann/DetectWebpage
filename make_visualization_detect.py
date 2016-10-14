@@ -698,8 +698,8 @@ def main():
                             dict_web['Number_2'] = int(Cat['NR'][i])
                             dict_web['Number_3'] = int(Cat['ID'][i])
                             dict_web['Number_4'] = sn
-                            dict_web['Number_5'] = ras
-                            dict_web['Number_6'] = decs
+                            dict_web['Number_5'] = float(ras)
+                            dict_web['Number_6'] = float(decs)
                             dict_web['Table_1'] = [('S/N: %0.2f' %(sn)),
                                                    ('chi2: %0.2f' %(chi2)),
                                                    ('flux: %0.1f'% (flux))]
