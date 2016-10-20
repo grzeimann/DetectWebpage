@@ -30,7 +30,7 @@ from pyhetdex.het.fplane import FPlane
 from pyhetdex.coordinates.tangent_projection_astropy import TangentPlane as TP
 
 
-dist_thresh = 2. # Fiber Distance
+dist_thresh = 4. # Fiber Distance
 sn_cut = 4.0 # S/N Cut
 xw = 24 # image width in x-dir 
 yw = 10 # image width in y-dir
@@ -708,9 +708,6 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                         xfiber += ifuy
                         yfiber += ifux
                         ra, dec = tp.xy2raDec(xfiber, yfiber)
-                        print(xfiber, yfiber, l)
-                        print(Di.dx[dither],Di.dy[dither])
-                        print(3600.*(ra-ras)*np.cos(decs*np.pi/180.),3600.*(dec-decs))
                         datakeep['ra'].append(ra)
                         datakeep['dec'].append(dec)
                         xl = int(np.round(xi-xw))
