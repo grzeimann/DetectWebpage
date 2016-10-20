@@ -864,11 +864,12 @@ def main():
                                                          np.float, np.float, np.float, np.float, 
                                                          np.float, np.float, np.float, np.float,
                                                          np.float, np.float, np.float, np.float,
-                                                         np.float, np.float)}, ndmin=0)
+                                                         np.float, np.float)}, ndmin=1)
                 if not Cat1.size:
                     if args.debug:
                         print("No continuum sources for specid %s" %specid)
                 else:
+                    print(Cat1.ndim)
                     make_continuum_row(Cat1, f_cont_webpage, args, D, Di, ifux, 
                                        ifuy, IFU, tp, specid, wcs, data)
                 
@@ -885,9 +886,10 @@ def main():
                                                          np.float, np.float, np.float, np.float, 
                                                          np.float, np.float, np.float, np.float,
                                                          np.float, np.float, np.float, np.float,
-                                                         np.float)},ndmin=0)
+                                                         np.float)},ndmin=1)
                 if not Cat.size:
                     continue
+                print(Cat.ndim)
                 make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, 
                                   IFU, tp, specid, wcs, data)
 
