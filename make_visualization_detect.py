@@ -504,6 +504,7 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
 
 def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid, 
                       wcs, data):
+    print(Cat)
     for i, a  in enumerate(Cat['XS']):
         if args.debug:
             t1 = time.time()
@@ -863,7 +864,7 @@ def main():
                                                          np.float, np.float, np.float, np.float, 
                                                          np.float, np.float, np.float, np.float,
                                                          np.float, np.float, np.float, np.float,
-                                                         np.float, np.float)}, ndmin=1)
+                                                         np.float, np.float)}, ndmin=0)
                 if not Cat1.size:
                     if args.debug:
                         print("No continuum sources for specid %s" %specid)
@@ -886,7 +887,7 @@ def main():
                                                          np.float, np.float, np.float, np.float, 
                                                          np.float, np.float, np.float, np.float,
                                                          np.float, np.float, np.float, np.float,
-                                                         np.float)},ndmin=1)
+                                                         np.float)},ndmin=0)
                 if not Cat.size:
                     continue
                 if Cat.ndim<2:
