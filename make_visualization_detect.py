@@ -767,8 +767,8 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                             crval = fits.open(FE_fn)[0].header['CRVAL1']
                             cdelt = fits.open(FE_fn)[0].header['CDELT1']
                             wave = np.arange(xlen)*cdelt + crval
-                            Fe_indl = np.searchsorted(wave,Cat['l'][i]-ww,side='left')
-                            Fe_indh = np.searchsorted(wave,Cat['l'][i]+ww,side='right')
+                            Fe_indl = np.searchsorted(wave,Cat['zmin'][i]/2.+Cat['zmax'][i]/2.-ww,side='left')
+                            Fe_indh = np.searchsorted(wave,Cat['zmin'][i]/2.+Cat['zmax'][i]/2.+ww,side='right')
                             datakeep['spec'].append(FE[l,Fe_indl:(Fe_indh+1)])
                             datakeep['spece'].append(FEe[l,Fe_indl:(Fe_indh+1)])
                             datakeep['specwave'].append(wave[Fe_indl:(Fe_indh+1)])
@@ -872,8 +872,6 @@ def main():
                         print("No continuum sources for specid %s" %specid)
                 else:
                     if Cat1.ndim<2:
-                        print(Cat1.size)
-                        print(Cat1.ndim)
                         Cat1 = np.array(Cat1)[np.newaxis,:]
                     make_continuum_row(Cat1, f_cont_webpage, args, D, Di, ifux, 
                                        ifuy, IFU, tp, specid, wcs, data)
