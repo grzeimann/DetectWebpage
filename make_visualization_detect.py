@@ -100,7 +100,7 @@ CAM_IFU_DICT = {'004':'051',
 # Default set of spectrographs for reduction
 SPECID = ["004","008","012","013","016","017","020","024","025","027","032",
           "037","038","041","047","051"]
-#SPECID = ["051"]
+SPECID = ["027"]
 SIDE = ["L", "R"]
 
 columnnames = ["SPECID", "NR", "ID", "S/N", "RA", "Dec", "Source_Info", "2D Plots","Spec Plots","Cutouts"]
@@ -872,6 +872,8 @@ def main():
                         print("No continuum sources for specid %s" %specid)
                 else:
                     if Cat1.ndim<2:
+                        print(Cat1.shape)
+                        print(Cat1)
                         Cat1 = Cat1[np.newaxis,:]
                     make_continuum_row(Cat1, f_cont_webpage, args, D, Di, ifux, 
                                        ifuy, IFU, tp, specid, wcs, data)
@@ -892,8 +894,8 @@ def main():
                                                          np.float)})
                 if not Cat:
                     continue
-                if Cat1.ndim<2:
-                    Cat1 = Cat1[np.newaxis,:]
+                if Cat.ndim<2:
+                    Cat = Cat[np.newaxis,:]
                 make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, 
                                   IFU, tp, specid, wcs, data)
 
