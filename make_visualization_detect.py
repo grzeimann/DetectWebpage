@@ -31,7 +31,7 @@ from pyhetdex.coordinates.tangent_projection_astropy import TangentPlane as TP
 
 
 dist_thresh = 2. # Fiber Distance
-sn_cut = 4.5 # S/N Cut
+sn_cut = 4.0 # S/N Cut
 xw = 24 # image width in x-dir 
 yw = 10 # image width in y-dir
 res = [3,9]
@@ -504,6 +504,24 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
     fig.savefig(outfile,dpi=150)
     plt.close(fig)
 
+def decimal_to_hours(ra, dec):
+    rah = int(ra / 15.)
+    ram = int((ra / 15. - rah) * 60.)
+    ras = ((ra / 15. - rah) * 60. - ram) * 60.
+    RA = '%02d:%02d:%02.2f' %(rah, ram, ras)
+    if dec>0:
+        decd = int(dec)
+        decm = int((dec - decd) * 60.)
+        decs = ((dec - decd) * 60. - decm) * 60.
+        DEC = '%02d:%02d:%05.2f' %(decd, decm, decs)
+    else:
+        decd = int(dec)
+        decm = int((decd - dec) * 60.)
+        decs = (((decd - dec) * 60.) - decm) * 60. 
+        DEC = '-%02d:%02d:%05.2f' %(np.abs(decd), decm, decs)
+    return RA, DEC
+    
+
 
 def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid, 
                       wcs, data):
@@ -653,13 +671,17 @@ def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                 dict_web['Number_4'] = sn
                 dict_web['Number_5'] = float(ras)
                 dict_web['Number_6'] = float(decs)
+                RA, DEC = decimal_to_hours(ras, decs)
                 dict_web['Table_1'] = [('S/N: %0.2f' %(sn)),
                                        ('chi2: %0.2f' %(chi2)),
-                                       ('flux: %0.1f'% (flux))]
+                                       ('flux: %0.1f'% (flux)),
+                                       ('RA: %s' %RA), 
+                                       ('Dec: %s' %DEC)]
                 dict_web['Image_1'] = outfile_2d
                 dict_web['Image_2'] = outfile_spec
                 dict_web['Image_3'] = outfile_cut
                 CW.CreateWebpage.writeColumn(f_webpage,dict_web)  
+
 
 
 def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid, 
