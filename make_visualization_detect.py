@@ -504,7 +504,6 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
 
 def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid, 
                       wcs, data):
-    print(Cat)
     for i, a  in enumerate(Cat['XS']):
         if args.debug:
             t1 = time.time()
@@ -704,8 +703,8 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                         f0 = D[side].get_reference_f(l+1)
                         xi = D[side].map_wf_x(Cat['zmin'][i]/2.+Cat['zmax'][i]/2.,f0)
                         yi = D[side].map_wf_y(Cat['zmin'][i]/2.+Cat['zmax'][i]/2.,f0)
-                        xfiber = IFU.xifu[side][l]+Di.dx[dither]
-                        yfiber = IFU.yifu[side][l]+Di.dy[dither]
+                        xfiber = IFU.xifu[side][l]-Di.dx[dither]
+                        yfiber = IFU.yifu[side][l]-Di.dy[dither]
                         xfiber += ifuy
                         yfiber += ifux
                         ra, dec = tp.xy2raDec(xfiber, yfiber)
@@ -869,7 +868,6 @@ def main():
                     if args.debug:
                         print("No continuum sources for specid %s" %specid)
                 else:
-                    print(Cat1.ndim)
                     make_continuum_row(Cat1, f_cont_webpage, args, D, Di, ifux, 
                                        ifuy, IFU, tp, specid, wcs, data)
                 
@@ -889,7 +887,6 @@ def main():
                                                          np.float)},ndmin=1)
                 if not Cat.size:
                     continue
-                print(Cat.ndim)
                 make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, 
                                   IFU, tp, specid, wcs, data)
 
