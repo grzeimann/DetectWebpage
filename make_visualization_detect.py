@@ -789,7 +789,7 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                             % (op.basename(args.folder), specid, 
                                Cat['ID'][i]))
                 build_spec_image(datakeep, outfile_spec, 
-                                 cwave=Cat['l'][i], debug=args.debug)  
+                                 cwave=Cat['zmin'][i]/2.+Cat['zmax'][i]/2., debug=args.debug)  
                 if args.debug:
                     t2 = time.time()
                     print("Time Taken Making Spectra Plot: %0.2f" %(t2-t1))
