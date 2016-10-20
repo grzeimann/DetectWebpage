@@ -709,6 +709,7 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                         yfiber += ifux
                         ra, dec = tp.xy2raDec(xfiber, yfiber)
                         print(xfiber, yfiber)
+                        print(Di.dx[dither],Di.dy[dither])
                         print(3600.*(ra-ras)*np.cos(decs*np.pi/180.),3600.*(dec-decs))
                         datakeep['ra'].append(ra)
                         datakeep['dec'].append(dec)
