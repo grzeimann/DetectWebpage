@@ -676,7 +676,8 @@ def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                                        ('chi2: %0.2f' %(chi2)),
                                        ('flux: %0.1f'% (flux)),
                                        ('RA: %s' %RA), 
-                                       ('Dec: %s' %DEC)]
+                                       ('Dec: %s' %DEC),
+                                       ('X: %0.2f, Y: %0.2f' %(x, y))]
                 dict_web['Image_1'] = outfile_2d
                 dict_web['Image_2'] = outfile_spec
                 dict_web['Image_3'] = outfile_cut
