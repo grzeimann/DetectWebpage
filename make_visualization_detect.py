@@ -772,7 +772,7 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                             datakeep['spec'].append(FE[l,Fe_indl:(Fe_indh+1)])
                             datakeep['spece'].append(FEe[l,Fe_indl:(Fe_indh+1)])
                             datakeep['specwave'].append(wave[Fe_indl:(Fe_indh+1)])
-            if datakeep['icx']:
+            if datakeep['xi']:
                 if args.debug:
                     t2 = time.time()
                     print("Time Taken Building Source Dictionary: %0.2f" %(t2-t1))
