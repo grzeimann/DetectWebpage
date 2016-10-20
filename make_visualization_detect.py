@@ -504,12 +504,7 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
 
 def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid, 
                       wcs, data):
-
-    if Cat.ndim < 2:
-        Cat = Cat[np.newaxis,:]
-    else:
-        Cat = np.squeeze(Cat)
-    for i in xrange(len(Cat['XS'])):
+    for i, a  in enumerate(Cat['XS']):
         if args.debug:
             t1 = time.time()
         x = Cat['XS'][i]
@@ -666,12 +661,8 @@ def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
 
 def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid, 
                       wcs, data):
-    print(Cat)
-    if Cat.ndim < 2:
-        Cat = Cat[np.newaxis,:]
-    else:
-        Cat = np.squeeze(Cat)
-    for i in xrange(len(Cat['icx'])):
+
+    for i, a  in enumerate(Cat['icx']):
         if args.debug:
             t1 = time.time()
         x = Cat['icx'][i]
