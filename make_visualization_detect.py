@@ -513,6 +513,7 @@ def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
         x = Cat['XS'][i]
         y = Cat['YS'][i]
         sn = Cat['sigma'][i]
+        print(sn)
         chi2 = Cat['chi2'][i]
         flux = Cat['dataflux'][i]
         datakeep = {}
