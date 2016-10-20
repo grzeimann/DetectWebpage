@@ -666,6 +666,7 @@ def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
 
 def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid, 
                       wcs, data):
+    print(Cat.ndim)
     if Cat.ndim < 2:
         Cat = Cat[np.newaxis,:]
     else:
