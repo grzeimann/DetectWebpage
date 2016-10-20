@@ -30,7 +30,7 @@ from pyhetdex.het.fplane import FPlane
 from pyhetdex.coordinates.tangent_projection_astropy import TangentPlane as TP
 
 
-dist_thresh = 2. # Fiber Distance
+dist_thresh = 4. # Fiber Distance
 sn_cut = 4.0 # S/N Cut
 xw = 24 # image width in x-dir 
 yw = 10 # image width in y-dir
@@ -539,16 +539,16 @@ def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
         if sn>sn_cut:
             for side in SIDE:
                 for dither in xrange(len(Di.dx)):
-                    dx = x-IFU.xifu[side]-Di.dx[dither]
-                    dy = y-IFU.yifu[side]-Di.dy[dither]
+                    dx = x-IFU.xifu[side]+Di.dx[dither]
+                    dy = y-IFU.yifu[side]+Di.dy[dither]
                     d = np.sqrt(dx**2 + dy**2)
                     loc = np.where(d<dist_thresh)[0]
                     for l in loc:
                         f0 = D[side].get_reference_f(l+1)
                         xi = D[side].map_wf_x(Cat['l'][i],f0)
                         yi = D[side].map_wf_y(Cat['l'][i],f0)
-                        xfiber = IFU.xifu[side][l]+Di.dx[dither]
-                        yfiber = IFU.yifu[side][l]+Di.dy[dither]
+                        xfiber = IFU.xifu[side][l]-Di.dx[dither]
+                        yfiber = IFU.yifu[side][l]-Di.dy[dither]
                         xfiber += ifuy
                         yfiber += ifux
                         ra, dec = tp.xy2raDec(xfiber, yfiber)
