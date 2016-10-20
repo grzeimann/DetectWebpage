@@ -867,13 +867,13 @@ def main():
                                                          np.float, np.float, np.float, np.float,
                                                          np.float, np.float, np.float, np.float,
                                                          np.float, np.float)})
-                if not Cat1:
+                if not Cat1.size:
                     if args.debug:
                         print("No continuum sources for specid %s" %specid)
                 else:
                     if Cat1.ndim<2:
-                        print(np.array(Cat1).shape)
-                        print(np.array(Cat1))
+                        print(Cat1.size)
+                        print(Cat1.ndim)
                         Cat1 = np.array(Cat1)[np.newaxis,:]
                     make_continuum_row(Cat1, f_cont_webpage, args, D, Di, ifux, 
                                        ifuy, IFU, tp, specid, wcs, data)
@@ -892,7 +892,7 @@ def main():
                                                          np.float, np.float, np.float, np.float,
                                                          np.float, np.float, np.float, np.float,
                                                          np.float)})
-                if not Cat:
+                if not Cat.size:
                     continue
                 if Cat.ndim<2:
                     Cat = Cat[np.newaxis,:]
