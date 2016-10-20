@@ -695,8 +695,8 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
         if sn>1:
             for side in SIDE:
                 for dither in xrange(len(Di.dx)):
-                    dx = x-IFU.xifu[side]-Di.dx[dither]
-                    dy = y-IFU.yifu[side]-Di.dy[dither]
+                    dx = x-IFU.xifu[side]+Di.dx[dither]
+                    dy = y-IFU.yifu[side]+Di.dy[dither]
                     d = np.sqrt(dx**2 + dy**2)
                     loc = np.where(d<dist_thresh)[0]
                     for l in loc:
