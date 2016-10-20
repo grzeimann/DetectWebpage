@@ -866,7 +866,7 @@ def main():
                                                          np.float, np.float, np.float, np.float, 
                                                          np.float, np.float, np.float, np.float,
                                                          np.float, np.float, np.float, np.float,
-                                                         np.float, np.float)})
+                                                         np.float, np.float)}, ndmin=1)
                 if not Cat1.size:
                     if args.debug:
                         print("No continuum sources for specid %s" %specid)
@@ -891,7 +891,7 @@ def main():
                                                          np.float, np.float, np.float, np.float, 
                                                          np.float, np.float, np.float, np.float,
                                                          np.float, np.float, np.float, np.float,
-                                                         np.float)})
+                                                         np.float)},ndmin=1)
                 if not Cat.size:
                     continue
                 if Cat.ndim<2:
