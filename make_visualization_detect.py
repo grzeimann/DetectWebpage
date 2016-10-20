@@ -31,7 +31,7 @@ from pyhetdex.coordinates.tangent_projection_astropy import TangentPlane as TP
 
 
 dist_thresh = 2. # Fiber Distance
-sn_cut = 5.0 # S/N Cut
+sn_cut = 4.5 # S/N Cut
 xw = 24 # image width in x-dir 
 yw = 10 # image width in y-dir
 res = [3,9]
@@ -352,10 +352,10 @@ def build_spec_image(datakeep, outfile, cwave, dwave=1.0, cmap=None,
     F /= W
     specplot.step(bigwave, F, c='b',where='mid',lw=2)
     ran = mx - mn
-    specplot.errorbar(cwave-.8*ww, mn+ran*(1+rm)*0.8, 
+    specplot.errorbar(cwave-.8*ww, mn+ran*(1+rm)*0.85, 
                       yerr=biweight_location(np.array(datakeep['spece'][:])),
-                      fmt='o',marker='o', ms=2, mec='k', ecolor=[0.7,0.7,0.7],
-                      mew=1, capsize=1, elinewidth=2, mfc=[0.7,0.7,0.7])
+                      fmt='o',marker='o', ms=4, mec='k', ecolor=[0.7,0.7,0.7],
+                      mew=1, elinewidth=3, mfc=[0.7,0.7,0.7])
     specplot.plot([cwave,cwave],[mn-ran*rm, mn+ran*(1+rm)],ls='--',c=[0.3,0.3,0.3])
     specplot.axis([cwave-ww, cwave+ww, mn-ran*rm, mn+ran*(1+rm)])
     fig.savefig(outfile,dpi=150)
