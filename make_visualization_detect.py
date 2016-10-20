@@ -104,6 +104,7 @@ SPECID = ["004","008","012","013","016","017","020","024","025","027","032",
 SIDE = ["L", "R"]
 
 columnnames = ["SPECID", "NR", "ID", "S/N", "RA", "Dec", "Source_Info", "2D Plots","Spec Plots","Cutouts"]
+columnnames_cont = ["SPECID", "ID", "S/N", "RA", "Dec", "2D Plots", "Spec Plots", "Cutouts"]
 
 class ParseDither():
     """
@@ -367,7 +368,6 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
         norm = plt.Normalize()
         colors = plt.cm.viridis_r(norm(np.arange(len(datakeep['ra'])+2)))
     pixsize_x = np.sqrt(wcs.wcs.cd[0,0]**2 + wcs.wcs.cd[0,1]**2)*3600. 
-    pixsize_y = np.sqrt(wcs.wcs.cd[1,0]**2 + wcs.wcs.cd[1,1]**2)*3600.
     ind = sorted(range(len(datakeep['d'])), key=lambda k: datakeep['d'][k], 
                  reverse=True)
     size = int(sz / pixsize_x)
@@ -433,8 +433,6 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
         borplot.set_xticks([])
         borplot.set_yticks([]) 
         borplot.axis('off')
-        mn = biweight_location(datakeep['im'][ind[i]])
-        st = np.sqrt(biweight_midvariance(datakeep['im'][ind[i]]))
         ext = list(np.hstack([datakeep['xl'][ind[i]],datakeep['xh'][ind[i]],
                               datakeep['yl'][ind[i]],datakeep['yh'][ind[i]]]))
         GF = gaussian_filter(datakeep['im'][ind[i]],(2,1))  
@@ -503,11 +501,323 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
     fig.savefig(outfile,dpi=150)
     plt.close(fig)
 
-    
+
+def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid, 
+                      wcs, data):
+    if Cat.ndim < 2:
+        Cat = Cat[np.newaxis,:]
+    for i in xrange(len(Cat[:,])):
+        if args.debug:
+            t1 = time.time()
+        x = Cat['XS'][i]
+        y = Cat['YS'][i]
+        sn = Cat['sigma'][i]
+        chi2 = Cat['chi2'][i]
+        flux = Cat['dataflux'][i]
+        datakeep = {}
+        datakeep['xi'] = []
+        datakeep['yi'] = []
+        datakeep['xl'] = []
+        datakeep['yl'] = []
+        datakeep['xh'] = []
+        datakeep['yh'] = []
+        datakeep['sn'] = []
+        datakeep['d'] = []
+        datakeep['dx'] = []
+        datakeep['dy'] = []
+        datakeep['im'] = []
+        datakeep['vmin'] = []
+        datakeep['vmax'] = []
+        datakeep['err'] = []
+        datakeep['pix'] = []
+        datakeep['spec'] = []
+        datakeep['spece'] = []
+        datakeep['specwave'] = []
+        datakeep['cos'] = []
+        datakeep['par'] = []
+        datakeep['ra'] = []
+        datakeep['dec'] = []
+        ras, decs = tp.xy2raDec(x+ifuy,y+ifux)
+        if sn>sn_cut:
+            for side in SIDE:
+                for dither in xrange(len(Di.dx)):
+                    dx = x-IFU.xifu[side]-Di.dx[dither]
+                    dy = y-IFU.yifu[side]-Di.dy[dither]
+                    d = np.sqrt(dx**2 + dy**2)
+                    loc = np.where(d<dist_thresh)[0]
+                    for l in loc:
+                        f0 = D[side].get_reference_f(l+1)
+                        xi = D[side].map_wf_x(Cat['l'][i],f0)
+                        yi = D[side].map_wf_y(Cat['l'][i],f0)
+                        xfiber = IFU.xifu[side][l]+Di.dx[dither]
+                        yfiber = IFU.yifu[side][l]+Di.dy[dither]
+                        xfiber += ifuy
+                        yfiber += ifux
+                        ra, dec = tp.xy2raDec(xfiber, yfiber)
+                        datakeep['ra'].append(ra)
+                        datakeep['dec'].append(dec)
+                        xl = int(np.round(xi-xw))
+                        xh = int(np.round(xi+xw))
+                        yl = int(np.round(yi-yw))
+                        yh = int(np.round(yi+yw))
+                        datakeep['xi'].append(xi)
+                        datakeep['yi'].append(yi)
+                        datakeep['xl'].append(xl)
+                        datakeep['yl'].append(yl)
+                        datakeep['xh'].append(xh)
+                        datakeep['yh'].append(yh)
+                        datakeep['d'].append(d[l])
+                        datakeep['sn'].append(sn)
+                        dir_fn = op.dirname(Di.basename[dither])
+                        base_fn = op.basename(Di.basename[dither])
+                        if args.debug:
+                            print(xi[0],yi[0],base_fn+'_'+side+'.fits')
+                        im_fn = op.join(args.folder, 'c'+specid, op.join(
+                                         dir_fn, base_fn+'_'+side+'.fits'))
+                        err_fn = op.join(args.folder, 'c'+specid, op.join(
+                                         dir_fn, 'e.'+base_fn+'_'+side+'.fits'))
+                        cos_fn = op.join(args.folder, 'c'+specid, op.join(
+                                         dir_fn, 'c'+base_fn+'_'+side+'.fits'))
+                        FE_fn = op.join(args.folder, 'c'+specid, op.join(
+                                         dir_fn, 'Fe'+base_fn+'_'+side+'.fits'))
+                        FEe_fn = op.join(args.folder, 'c'+specid, op.join(
+                                         dir_fn, 'e.Fe'+base_fn+'_'+side+'.fits'))
+                        pix_fn = op.join(virus_config, 'PixelFlats',
+                                         'pixelflat_cam%s_%s.fits'%(specid,side)) 
+                        if op.exists(im_fn):
+                            datakeep['im'].append(fits.open(im_fn)[0].data[yl:yh,xl:xh])
+                            datakeep['par'].append(fits.open(im_fn)[0].header['PARANGLE'])
+                            I = fits.open(im_fn)[0].data.ravel()
+                            I[np.isnan(I)] = 0.0
+                            s_ind = np.argsort(I)
+                            len_s = len(s_ind)
+                            s_rank = np.arange(len_s)
+                            p = np.polyfit(s_rank-len_s/2,I[s_ind],1)
+                            z1 = I[s_ind[len_s/2]]+p[0]*(1-len_s/2)/contrast
+                            z2 = I[s_ind[len_s/2]]+p[0]*(len_s-len_s/2)/contrast
+                            datakeep['vmin'].append(z1)
+                            datakeep['vmax'].append(z2)
+                        if op.exists(err_fn):
+                            datakeep['err'].append(fits.open(err_fn)[0].data[yl:yh,xl:xh])
+                        if op.exists(pix_fn):
+                            datakeep['pix'].append(fits.open(pix_fn)[0].data[yl:yh,xl:xh])
+                        if op.exists(cos_fn):
+                            datakeep['cos'].append(fits.open(cos_fn)[0].data[yl:yh,xl:xh])
+                        if op.exists(FE_fn):
+                            FE = fits.open(FE_fn)[0].data
+                            FEe = fits.open(FEe_fn)[0].data
+                            nfib, xlen = FE.shape
+                            crval = fits.open(FE_fn)[0].header['CRVAL1']
+                            cdelt = fits.open(FE_fn)[0].header['CDELT1']
+                            wave = np.arange(xlen)*cdelt + crval
+                            Fe_indl = np.searchsorted(wave,Cat['l'][i]-ww,side='left')
+                            Fe_indh = np.searchsorted(wave,Cat['l'][i]+ww,side='right')
+                            datakeep['spec'].append(FE[l,Fe_indl:(Fe_indh+1)])
+                            datakeep['spece'].append(FEe[l,Fe_indl:(Fe_indh+1)])
+                            datakeep['specwave'].append(wave[Fe_indl:(Fe_indh+1)])
+            if datakeep['xi']:
+                if args.debug:
+                    t2 = time.time()
+                    print("Time Taken Building Source Dictionary: %0.2f" %(t2-t1))
+                    t1 = time.time()
+                outfile_2d = ('images/image2d_%s_specid_%s_object_%i_%i.png' 
+                            % (op.basename(args.folder), specid, Cat['NR'][i], 
+                               Cat['ID'][i]))
+                build_2d_image(datakeep, outfile_2d, debug=args.debug)
+                if args.debug:
+                    t2 = time.time()
+                    print("Time Taken Making 2d Image: %0.2f" %(t2-t1))
+                    t1 = time.time()
+                outfile_spec = ('images/imagespec_%s_specid_%s_object_%i_%i.png' 
+                            % (op.basename(args.folder), specid, Cat['NR'][i],
+                               Cat['ID'][i]))
+                build_spec_image(datakeep, outfile_spec, 
+                                 cwave=Cat['l'][i], debug=args.debug)  
+                if args.debug:
+                    t2 = time.time()
+                    print("Time Taken Making Spectra Plot: %0.2f" %(t2-t1))
+                    t1 = time.time()
+                outfile_cut = ('images/imagecut_%s_specid_%s_object_%i_%i.png' 
+                            % (op.basename(args.folder), specid, Cat['NR'][i], 
+                               Cat['ID'][i]))
+                make_image_cutout(datakeep, data, wcs, ras, decs, 
+                                  outfile_cut, debug=args.debug, args=args)
+                if args.debug:
+                    t2 = time.time()
+                    print("Time Taken Making Image Cutout: %0.2f" %(t2-t1))
+                dict_web = OrderedDict()
+                dict_web['Number_1'] = int(specid)
+                dict_web['Number_2'] = int(Cat['NR'][i])
+                dict_web['Number_3'] = int(Cat['ID'][i])
+                dict_web['Number_4'] = sn
+                dict_web['Number_5'] = float(ras)
+                dict_web['Number_6'] = float(decs)
+                dict_web['Table_1'] = [('S/N: %0.2f' %(sn)),
+                                       ('chi2: %0.2f' %(chi2)),
+                                       ('flux: %0.1f'% (flux))]
+                dict_web['Image_1'] = outfile_2d
+                dict_web['Image_2'] = outfile_spec
+                dict_web['Image_3'] = outfile_cut
+                CW.CreateWebpage.writeColumn(f_webpage,dict_web)  
+
+
+def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid, 
+                      wcs, data):
+    if Cat.ndim < 2:
+        Cat = Cat[np.newaxis,:]
+    for i in xrange(len(Cat['icx'])):
+        if args.debug:
+            t1 = time.time()
+        x = Cat['icx'][i]
+        y = Cat['icy'][i]
+        sn = Cat['sigma'][i]
+        datakeep = {}
+        datakeep['xi'] = []
+        datakeep['yi'] = []
+        datakeep['xl'] = []
+        datakeep['yl'] = []
+        datakeep['xh'] = []
+        datakeep['yh'] = []
+        datakeep['sn'] = []
+        datakeep['d'] = []
+        datakeep['dx'] = []
+        datakeep['dy'] = []
+        datakeep['im'] = []
+        datakeep['vmin'] = []
+        datakeep['vmax'] = []
+        datakeep['err'] = []
+        datakeep['pix'] = []
+        datakeep['spec'] = []
+        datakeep['spece'] = []
+        datakeep['specwave'] = []
+        datakeep['cos'] = []
+        datakeep['par'] = []
+        datakeep['ra'] = []
+        datakeep['dec'] = []
+        ras, decs = tp.xy2raDec(x+ifuy,y+ifux)
+        if sn>1:
+            for side in SIDE:
+                for dither in xrange(len(Di.dx)):
+                    dx = x-IFU.xifu[side]-Di.dx[dither]
+                    dy = y-IFU.yifu[side]-Di.dy[dither]
+                    d = np.sqrt(dx**2 + dy**2)
+                    loc = np.where(d<dist_thresh)[0]
+                    for l in loc:
+                        f0 = D[side].get_reference_f(l+1)
+                        xi = D[side].map_wf_x(Cat['zmin'][i]/2.+Cat['zmax'][i]/2.,f0)
+                        yi = D[side].map_wf_y(Cat['zmin'][i]/2.+Cat['zmax'][i]/2.,f0)
+                        xfiber = IFU.xifu[side][l]+Di.dx[dither]
+                        yfiber = IFU.yifu[side][l]+Di.dy[dither]
+                        xfiber += ifuy
+                        yfiber += ifux
+                        ra, dec = tp.xy2raDec(xfiber, yfiber)
+                        datakeep['ra'].append(ra)
+                        datakeep['dec'].append(dec)
+                        xl = int(np.round(xi-xw))
+                        xh = int(np.round(xi+xw))
+                        yl = int(np.round(yi-yw))
+                        yh = int(np.round(yi+yw))
+                        datakeep['xi'].append(xi)
+                        datakeep['yi'].append(yi)
+                        datakeep['xl'].append(xl)
+                        datakeep['yl'].append(yl)
+                        datakeep['xh'].append(xh)
+                        datakeep['yh'].append(yh)
+                        datakeep['d'].append(d[l])
+                        datakeep['sn'].append(sn)
+                        dir_fn = op.dirname(Di.basename[dither])
+                        base_fn = op.basename(Di.basename[dither])
+                        if args.debug:
+                            print(xi[0],yi[0],base_fn+'_'+side+'.fits')
+                        im_fn = op.join(args.folder, 'c'+specid, op.join(
+                                         dir_fn, base_fn+'_'+side+'.fits'))
+                        err_fn = op.join(args.folder, 'c'+specid, op.join(
+                                         dir_fn, 'e.'+base_fn+'_'+side+'.fits'))
+                        cos_fn = op.join(args.folder, 'c'+specid, op.join(
+                                         dir_fn, 'c'+base_fn+'_'+side+'.fits'))
+                        FE_fn = op.join(args.folder, 'c'+specid, op.join(
+                                         dir_fn, 'Fe'+base_fn+'_'+side+'.fits'))
+                        FEe_fn = op.join(args.folder, 'c'+specid, op.join(
+                                         dir_fn, 'e.Fe'+base_fn+'_'+side+'.fits'))
+                        pix_fn = op.join(virus_config, 'PixelFlats',
+                                         'pixelflat_cam%s_%s.fits'%(specid,side)) 
+                        if op.exists(im_fn):
+                            datakeep['im'].append(fits.open(im_fn)[0].data[yl:yh,xl:xh])
+                            datakeep['par'].append(fits.open(im_fn)[0].header['PARANGLE'])
+                            I = fits.open(im_fn)[0].data.ravel()
+                            I[np.isnan(I)] = 0.0
+                            s_ind = np.argsort(I)
+                            len_s = len(s_ind)
+                            s_rank = np.arange(len_s)
+                            p = np.polyfit(s_rank-len_s/2,I[s_ind],1)
+                            z1 = I[s_ind[len_s/2]]+p[0]*(1-len_s/2)/contrast
+                            z2 = I[s_ind[len_s/2]]+p[0]*(len_s-len_s/2)/contrast
+                            datakeep['vmin'].append(z1)
+                            datakeep['vmax'].append(z2)
+                        if op.exists(err_fn):
+                            datakeep['err'].append(fits.open(err_fn)[0].data[yl:yh,xl:xh])
+                        if op.exists(pix_fn):
+                            datakeep['pix'].append(fits.open(pix_fn)[0].data[yl:yh,xl:xh])
+                        if op.exists(cos_fn):
+                            datakeep['cos'].append(fits.open(cos_fn)[0].data[yl:yh,xl:xh])
+                        if op.exists(FE_fn):
+                            FE = fits.open(FE_fn)[0].data
+                            FEe = fits.open(FEe_fn)[0].data
+                            nfib, xlen = FE.shape
+                            crval = fits.open(FE_fn)[0].header['CRVAL1']
+                            cdelt = fits.open(FE_fn)[0].header['CDELT1']
+                            wave = np.arange(xlen)*cdelt + crval
+                            Fe_indl = np.searchsorted(wave,Cat['l'][i]-ww,side='left')
+                            Fe_indh = np.searchsorted(wave,Cat['l'][i]+ww,side='right')
+                            datakeep['spec'].append(FE[l,Fe_indl:(Fe_indh+1)])
+                            datakeep['spece'].append(FEe[l,Fe_indl:(Fe_indh+1)])
+                            datakeep['specwave'].append(wave[Fe_indl:(Fe_indh+1)])
+            if datakeep['icx']:
+                if args.debug:
+                    t2 = time.time()
+                    print("Time Taken Building Source Dictionary: %0.2f" %(t2-t1))
+                    t1 = time.time()
+                outfile_2d = ('images/image2d_cont_%s_specid_%s_object_%i.png' 
+                            % (op.basename(args.folder), specid, 
+                               Cat['ID'][i]))
+                build_2d_image(datakeep, outfile_2d, debug=args.debug)
+                if args.debug:
+                    t2 = time.time()
+                    print("Time Taken Making 2d Image: %0.2f" %(t2-t1))
+                    t1 = time.time()
+                outfile_spec = ('images/imagespec_cont_%s_specid_%s_object_%i.png' 
+                            % (op.basename(args.folder), specid, 
+                               Cat['ID'][i]))
+                build_spec_image(datakeep, outfile_spec, 
+                                 cwave=Cat['l'][i], debug=args.debug)  
+                if args.debug:
+                    t2 = time.time()
+                    print("Time Taken Making Spectra Plot: %0.2f" %(t2-t1))
+                    t1 = time.time()
+                outfile_cut = ('images/imagecut_cont_%s_specid_%s_object_%i.png' 
+                            % (op.basename(args.folder), specid, 
+                               Cat['ID'][i]))
+                make_image_cutout(datakeep, data, wcs, ras, decs, 
+                                  outfile_cut, debug=args.debug, args=args)
+                if args.debug:
+                    t2 = time.time()
+                    print("Time Taken Making Image Cutout: %0.2f" %(t2-t1))
+                dict_web = OrderedDict()
+                dict_web['Number_1'] = int(specid)
+                dict_web['Number_2'] = int(Cat['ID'][i])
+                dict_web['Number_3'] = sn
+                dict_web['Number_4'] = float(ras)
+                dict_web['Number_5'] = float(decs)
+                dict_web['Image_1'] = outfile_2d
+                dict_web['Image_2'] = outfile_spec
+                dict_web['Image_3'] = outfile_cut
+                CW.CreateWebpage.writeColumn(f_webpage, dict_web)  
+   
 def main():
     args = parse_args()
     webpage_name = 'Detect Visualization_' + op.basename(args.folder)
-    non_sortable_cols = [7,8,9]
+    non_sortable_cols = [7,8,9,10]
+    non_sortable_cols_cont = [6,7,8]
     fplane = FPlane(fplane_file)
     tp = TP(args.ra, args.dec, args.rot)
     if args.goodsn:
@@ -519,9 +829,12 @@ def main():
     data = fits.open(image_fn)[0].data
     if not op.exists('images'):
         os.mkdir('images')
-    with open(webpage_name+'.html', 'w') as f_webpage:
+    with open(webpage_name+'.html', 'w') as f_webpage,\
+         open(webpage_name+'_cont.html', 'w') as f_cont_webpage:
         CW.CreateWebpage.writeHeader(f_webpage,webpage_name)
         CW.CreateWebpage.writeColumnNames(f_webpage,columnnames,non_sortable_cols)
+        CW.CreateWebpage.writeHeader(f_cont_webpage,webpage_name)
+        CW.CreateWebpage.writeColumnNames(f_cont_webpage,columnnames_cont,non_sortable_cols_cont)
         for specid in SPECID:
             ifux = fplane.by_ifuslot(CAM_IFUSLOT_DICT[specid]).x
             ifuy = fplane.by_ifuslot(CAM_IFUSLOT_DICT[specid]).y
@@ -539,6 +852,30 @@ def main():
                 D[s] = Distortion(op.join(args.folder, 'c'+specid, 
                                      Di.deformer[0]+'_%s.dist' %s))
             detect_fn = op.join(args.folder, 'c'+specid, 'detect_line.dat')
+            detect_cont_fn = op.join(args.folder, 'c'+specid, 'detect_cont.dat')
+            if op.exists(detect_cont_fn):
+                Cat1 = np.loadtxt(detect_cont_fn, dtype={'names': ('ID', 'icx', 
+                                                             'icy', 'sigma', 'fwhm_xy', 
+                                                             'a', 'b', 
+                                                             'pa', 'ir1', 
+                                                             'ka', 'kb', 
+                                                             'xmin', 'xmax', 
+                                                             'ymin', ' ymax', 
+                                                             'zmin', 'zmax'),
+                                             'formats': ('i4', np.float, np.float,
+                                                         np.float, np.float, np.float, np.float, 
+                                                         np.float, np.float, np.float, np.float,
+                                                         np.float, np.float, np.float, np.float,
+                                                         np.float, np.float)})
+                if not Cat1:
+                    if args.debug:
+                        print("No continuum sources for specid %s" %specid)
+                else:
+                    if Cat1.ndim<2:
+                        Cat1 = Cat1[np.newaxis,:]
+                    make_continuum_row(Cat1, f_cont_webpage, args, D, Di, ifux, 
+                                       ifuy, IFU, tp, specid, wcs, data)
+                
             if op.exists(detect_fn):
                 Cat = np.loadtxt(detect_fn, dtype={'names': ('NR', 'ID', 'XS', 
                                                              'YS', 'l', 'z', 
@@ -553,162 +890,14 @@ def main():
                                                          np.float, np.float, np.float, np.float,
                                                          np.float, np.float, np.float, np.float,
                                                          np.float)})
-                
-                for i in xrange(len(Cat['XS'])):
-                    if args.debug:
-                        t1 = time.time()
-                    x = Cat['XS'][i]
-                    y = Cat['YS'][i]
-                    sn = Cat['sigma'][i]
-                    chi2 = Cat['chi2'][i]
-                    flux = Cat['dataflux'][i]
-                    datakeep = {}
-                    datakeep['xi'] = []
-                    datakeep['yi'] = []
-                    datakeep['xl'] = []
-                    datakeep['yl'] = []
-                    datakeep['xh'] = []
-                    datakeep['yh'] = []
-                    datakeep['sn'] = []
-                    datakeep['d'] = []
-                    datakeep['dx'] = []
-                    datakeep['dy'] = []
-                    datakeep['im'] = []
-                    datakeep['vmin'] = []
-                    datakeep['vmax'] = []
-                    datakeep['err'] = []
-                    datakeep['pix'] = []
-                    datakeep['spec'] = []
-                    datakeep['spece'] = []
-                    datakeep['specwave'] = []
-                    datakeep['cos'] = []
-                    datakeep['par'] = []
-                    datakeep['ra'] = []
-                    datakeep['dec'] = []
-                    ras, decs = tp.xy2raDec(x+ifuy,y+ifux)
-                    if sn>sn_cut:
-                        for side in SIDE:
-                            for dither in xrange(len(Di.dx)):
-                                dx = x-IFU.xifu[side]-Di.dx[dither]
-                                dy = y-IFU.yifu[side]-Di.dy[dither]
-                                d = np.sqrt(dx**2 + dy**2)
-                                loc = np.where(d<dist_thresh)[0]
-                                for l in loc:
-                                    f0 = D[side].get_reference_f(l+1)
-                                    xi = D[side].map_wf_x(Cat['l'][i],f0)
-                                    yi = D[side].map_wf_y(Cat['l'][i],f0)
-                                    xfiber = IFU.xifu[side][l]+Di.dx[dither]
-                                    yfiber = IFU.yifu[side][l]+Di.dy[dither]
-                                    xfiber += ifuy
-                                    yfiber += ifux
-                                    ra, dec = tp.xy2raDec(xfiber, yfiber)
-                                    datakeep['ra'].append(ra)
-                                    datakeep['dec'].append(dec)
-                                    xl = int(np.round(xi-xw))
-                                    xh = int(np.round(xi+xw))
-                                    yl = int(np.round(yi-yw))
-                                    yh = int(np.round(yi+yw))
-                                    datakeep['xi'].append(xi)
-                                    datakeep['yi'].append(yi)
-                                    datakeep['xl'].append(xl)
-                                    datakeep['yl'].append(yl)
-                                    datakeep['xh'].append(xh)
-                                    datakeep['yh'].append(yh)
-                                    datakeep['d'].append(d[l])
-                                    datakeep['sn'].append(sn)
-                                    dir_fn = op.dirname(Di.basename[dither])
-                                    base_fn = op.basename(Di.basename[dither])
-                                    if args.debug:
-                                        print(xi[0],yi[0],base_fn+'_'+side+'.fits')
-                                    im_fn = op.join(args.folder, 'c'+specid, op.join(
-                                                     dir_fn, base_fn+'_'+side+'.fits'))
-                                    err_fn = op.join(args.folder, 'c'+specid, op.join(
-                                                     dir_fn, 'e.'+base_fn+'_'+side+'.fits'))
-                                    cos_fn = op.join(args.folder, 'c'+specid, op.join(
-                                                     dir_fn, 'c'+base_fn+'_'+side+'.fits'))
-                                    FE_fn = op.join(args.folder, 'c'+specid, op.join(
-                                                     dir_fn, 'Fe'+base_fn+'_'+side+'.fits'))
-                                    FEe_fn = op.join(args.folder, 'c'+specid, op.join(
-                                                     dir_fn, 'e.Fe'+base_fn+'_'+side+'.fits'))
-                                    pix_fn = op.join(virus_config, 'PixelFlats',
-                                                     'pixelflat_cam%s_%s.fits'%(specid,side)) 
-                                    if op.exists(im_fn):
-                                        datakeep['im'].append(fits.open(im_fn)[0].data[yl:yh,xl:xh])
-                                        datakeep['par'].append(fits.open(im_fn)[0].header['PARANGLE'])
-                                        I = fits.open(im_fn)[0].data.ravel()
-                                        I[np.isnan(I)] = 0.0
-                                        s_ind = np.argsort(I)
-                                        len_s = len(s_ind)
-                                        s_rank = np.arange(len_s)
-                                        p = np.polyfit(s_rank-len_s/2,I[s_ind],1)
-                                        z1 = I[s_ind[len_s/2]]+p[0]*(1-len_s/2)/contrast
-                                        z2 = I[s_ind[len_s/2]]+p[0]*(len_s-len_s/2)/contrast
-                                        datakeep['vmin'].append(z1)
-                                        datakeep['vmax'].append(z2)
-                                    if op.exists(err_fn):
-                                        datakeep['err'].append(fits.open(err_fn)[0].data[yl:yh,xl:xh])
-                                    if op.exists(pix_fn):
-                                        datakeep['pix'].append(fits.open(pix_fn)[0].data[yl:yh,xl:xh])
-                                    if op.exists(cos_fn):
-                                        datakeep['cos'].append(fits.open(cos_fn)[0].data[yl:yh,xl:xh])
-                                    if op.exists(FE_fn):
-                                        FE = fits.open(FE_fn)[0].data
-                                        FEe = fits.open(FEe_fn)[0].data
-                                        nfib, xlen = FE.shape
-                                        crval = fits.open(FE_fn)[0].header['CRVAL1']
-                                        cdelt = fits.open(FE_fn)[0].header['CDELT1']
-                                        wave = np.arange(xlen)*cdelt + crval
-                                        Fe_indl = np.searchsorted(wave,Cat['l'][i]-ww,side='left')
-                                        Fe_indh = np.searchsorted(wave,Cat['l'][i]+ww,side='right')
-                                        datakeep['spec'].append(FE[l,Fe_indl:(Fe_indh+1)])
-                                        datakeep['spece'].append(FEe[l,Fe_indl:(Fe_indh+1)])
-                                        datakeep['specwave'].append(wave[Fe_indl:(Fe_indh+1)])
-                        if datakeep['xi']:
-                            if args.debug:
-                                t2 = time.time()
-                                print("Time Taken Building Source Dictionary: %0.2f" %(t2-t1))
-                                t1 = time.time()
-                            outfile_2d = ('images/image2d_%s_specid_%s_object_%i_%i.png' 
-                                        % (op.basename(args.folder), specid, Cat['NR'][i], 
-                                           Cat['ID'][i]))
-                            build_2d_image(datakeep, outfile_2d, debug=args.debug)
-                            if args.debug:
-                                t2 = time.time()
-                                print("Time Taken Making 2d Image: %0.2f" %(t2-t1))
-                                t1 = time.time()
-                            outfile_spec = ('images/imagespec_%s_specid_%s_object_%i_%i.png' 
-                                        % (op.basename(args.folder), specid, Cat['NR'][i],
-                                           Cat['ID'][i]))
-                            build_spec_image(datakeep, outfile_spec, 
-                                             cwave=Cat['l'][i], debug=args.debug)  
-                            if args.debug:
-                                t2 = time.time()
-                                print("Time Taken Making Spectra Plot: %0.2f" %(t2-t1))
-                                t1 = time.time()
-                            outfile_cut = ('images/imagecut_%s_specid_%s_object_%i_%i.png' 
-                                        % (op.basename(args.folder), specid, Cat['NR'][i], 
-                                           Cat['ID'][i]))
-                            make_image_cutout(datakeep, data, wcs, ras, decs, 
-                                              outfile_cut, debug=args.debug, args=args)
-                            if args.debug:
-                                t2 = time.time()
-                                print("Time Taken Making Image Cutout: %0.2f" %(t2-t1))
-                            dict_web = OrderedDict()
-                            dict_web['Number_1'] = int(specid)
-                            dict_web['Number_2'] = int(Cat['NR'][i])
-                            dict_web['Number_3'] = int(Cat['ID'][i])
-                            dict_web['Number_4'] = sn
-                            dict_web['Number_5'] = float(ras)
-                            dict_web['Number_6'] = float(decs)
-                            dict_web['Table_1'] = [('S/N: %0.2f' %(sn)),
-                                                   ('chi2: %0.2f' %(chi2)),
-                                                   ('flux: %0.1f'% (flux))]
-                            dict_web['Image_1'] = outfile_2d
-                            dict_web['Image_2'] = outfile_spec
-                            dict_web['Image_3'] = outfile_cut
-                            CW.CreateWebpage.writeColumn(f_webpage,dict_web)  
+                if not Cat:
+                    continue
+                if Cat1.ndim<2:
+                    Cat1 = Cat1[np.newaxis,:]
+                make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, 
+                                  IFU, tp, specid, wcs, data)
+
         CW.CreateWebpage.writeEnding(f_webpage)     
-       
-    
+        CW.CreateWebpage.writeEnding(f_cont_webpage)      
 if __name__ == '__main__':
     main() 
