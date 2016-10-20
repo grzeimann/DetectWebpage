@@ -873,6 +873,7 @@ def main():
                 else:
                     if Cat1.ndim<2:
                         print(np.array(Cat1).shape)
+                        print(np.array(Cat1))
                         Cat1 = np.array(Cat1)[np.newaxis,:]
                     make_continuum_row(Cat1, f_cont_webpage, args, D, Di, ifux, 
                                        ifuy, IFU, tp, specid, wcs, data)
