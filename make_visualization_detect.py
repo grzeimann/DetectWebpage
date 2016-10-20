@@ -100,7 +100,7 @@ CAM_IFU_DICT = {'004':'051',
 # Default set of spectrographs for reduction
 SPECID = ["004","008","012","013","016","017","020","024","025","027","032",
           "037","038","041","047","051"]
-SPECID = ["027"]
+#SPECID = ["027"]
 SIDE = ["L", "R"]
 
 columnnames = ["SPECID", "NR", "ID", "S/N", "RA", "Dec", "Source_Info", "2D Plots","Spec Plots","Cutouts"]
@@ -590,7 +590,7 @@ def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                         dir_fn = op.dirname(Di.basename[dither])
                         base_fn = op.basename(Di.basename[dither])
                         if args.debug:
-                            print(xi[0],yi[0],base_fn+'_'+side+'.fits')
+                            print(xi,yi,base_fn+'_'+side+'.fits')
                         im_fn = op.join(args.folder, 'c'+specid, op.join(
                                          dir_fn, base_fn+'_'+side+'.fits'))
                         err_fn = op.join(args.folder, 'c'+specid, op.join(
