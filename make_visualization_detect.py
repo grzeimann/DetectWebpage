@@ -100,7 +100,7 @@ CAM_IFU_DICT = {'004':'051',
 # Default set of spectrographs for reduction
 SPECID = ["004","008","012","013","016","017","020","024","025","027","032",
           "037","038","041","047","051"]
-SPECID = ["013", "016", "017", "027", "041", "051"]
+SPECID = ["027"]
 SIDE = ["L", "R"]
 
 columnnames = ["SPECID", "NR", "ID", "S/N", "RA", "Dec", "Source_Info", "2D Plots","Spec Plots","Cutouts"]
@@ -341,10 +341,9 @@ def build_spec_image(datakeep, outfile, cwave, dwave=1.0, cmap=None,
     ind = sorted(range(len(datakeep['d'])), key=lambda k: datakeep['d'][k], 
                  reverse=True)
     for i in xrange(N):
-        specplot.errorbar(datakeep['specwave'][ind[i]], datakeep['spec'][ind[i]], 
-                          yerr = datakeep['spece'][ind[i]],fmt='o',marker='o',
-                          ms=4, mec=colors[i,0:3], ecolor=colors[i,0:3],
-                          mew=1, capsize=0, elinewidth=2, mfc=[0.7,0.7,0.7])
+
+        specplot.step(datakeep['specwave'][ind[i]], datakeep['spec'][ind[i]], 
+                          where='mid', color=colors[i,0:3])
         w1 = np.interp(datakeep['d'][ind[i]],r,w)
         F+=(np.interp(bigwave,datakeep['specwave'][ind[i]], datakeep['spec'][ind[i]])*w1)
         W+=w1
@@ -353,6 +352,10 @@ def build_spec_image(datakeep, outfile, cwave, dwave=1.0, cmap=None,
     F /= W
     specplot.step(bigwave, F, c='b',where='mid',lw=2)
     ran = mx - mn
+    specplot.errorbar(cwave-.8*ww, mn+ran*(1+rm)*0.8, 
+                      yerr=biweight_location(np.array(datakeep['spece'][:])),
+                      fmt='o',marker='o', ms=2, mec='k', ecolor=[0.7,0.7,0.7],
+                      mew=1, capsize=1, elinewidth=2, mfc=[0.7,0.7,0.7])
     specplot.plot([cwave,cwave],[mn-ran*rm, mn+ran*(1+rm)],ls='--',c=[0.3,0.3,0.3])
     specplot.axis([cwave-ww, cwave+ww, mn-ran*rm, mn+ran*(1+rm)])
     fig.savefig(outfile,dpi=150)
