@@ -507,13 +507,14 @@ def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
 
     if Cat.ndim < 2:
         Cat = Cat[np.newaxis,:]
+    else:
+        Cat = np.squeeze(Cat)
     for i in xrange(len(Cat['XS'])):
         if args.debug:
             t1 = time.time()
         x = Cat['XS'][i]
         y = Cat['YS'][i]
         sn = Cat['sigma'][i]
-        print(sn)
         chi2 = Cat['chi2'][i]
         flux = Cat['dataflux'][i]
         datakeep = {}
@@ -667,6 +668,8 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                       wcs, data):
     if Cat.ndim < 2:
         Cat = Cat[np.newaxis,:]
+    else:
+        Cat = np.squeeze(Cat)
     for i in xrange(len(Cat['icx'])):
         if args.debug:
             t1 = time.time()
