@@ -869,8 +869,6 @@ def main():
                     if args.debug:
                         print("No continuum sources for specid %s" %specid)
                 else:
-                    if Cat1.ndim<2:
-                        Cat1 = np.array(Cat1)[np.newaxis,:]
                     make_continuum_row(Cat1, f_cont_webpage, args, D, Di, ifux, 
                                        ifuy, IFU, tp, specid, wcs, data)
                 
@@ -890,8 +888,6 @@ def main():
                                                          np.float)},ndmin=0)
                 if not Cat.size:
                     continue
-                if Cat.ndim<2:
-                    Cat = Cat[np.newaxis,:]
                 make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, 
                                   IFU, tp, specid, wcs, data)
 
