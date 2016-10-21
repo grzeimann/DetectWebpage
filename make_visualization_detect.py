@@ -704,21 +704,21 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
             if d2d.arcsec[0] < 5.:
                 within.append(idx)
                 f_match.write('%s   %s   %s   %s   %s   %s   %s\n'
-                        % ((field).rjust(9), (specid).rjust(9), ("%0.5f" %ras).rjust(9), 
-                           ("%0.5f" %decs).rjust(8), 
-                           ("%0.5f" %catalog['alpha_j2000'][idx]).rjust(9),
-                           ("%0.5f" %catalog['delta_j2000'][idx]).rjust(8), 
-                           ("%0.2f" %d2d.arcsec[0]).rjust(4)))
+                        % ((field).ljust(9), (specid).ljust(9), ("%0.5f" %ras).ljust(9), 
+                           ("%0.5f" %decs).ljust(8), 
+                           ("%0.5f" %catalog['alpha_j2000'][idx]).ljust(9),
+                           ("%0.5f" %catalog['delta_j2000'][idx]).ljust(8), 
+                           ("%0.2f" %d2d.arcsec[0]).ljust(4)))
                 f_match.flush()
                
             if d2d2.arcsec[0] < 5.:
                 within.append(idx2)  
                 f_match.write('%s   %s   %s   %s   %s   %s   %s\n'
-                        % ((field).rjust(9), (specid).rjust(9), ("%0.5f" %ras).rjust(9), 
-                           ("%0.5f" %decs).rjust(8), 
-                           ("%0.5f" %catalog['alpha_j2000'][idx2]).rjust(9),
-                           ("%0.5f" %catalog['delta_j2000'][idx2]).rjust(8), 
-                           ("%0.2f" %d2d2.arcsec[0]).rjust(4)))
+                        % ((field).ljust(9), (specid).ljust(9), ("%0.5f" %ras).ljust(9), 
+                           ("%0.5f" %decs).ljust(8), 
+                           ("%0.5f" %catalog['alpha_j2000'][idx2]).ljust(9),
+                           ("%0.5f" %catalog['delta_j2000'][idx2]).ljust(8), 
+                           ("%0.2f" %d2d2.arcsec[0]).ljust(4)))
                 f_match.flush()
             if args.debug:
                 t2 = time.time()
@@ -860,11 +860,11 @@ def main():
         webpage_name = 'Detect_Visualization_' + op.basename(args.folder)+'_ending'+ '_emis'
     with open(match_catalog,'w') as f_match:
         f_match.write('%s   %s   %s   %s   %s   %s   %s\n'
-                      % ('Field'.rjust(9), 'SPECID'.rjust(9), ('RA_det').rjust(9), 
-                        ('Dec_det').rjust(8), 
-                        ('RA_cat').rjust(9),
-                        ('Dec_det').rjust(8), 
-                        ('Dist').rjust(4)))
+                      % ('Field'.ljust(9), 'SPECID'.ljust(9), ('RA_det').ljust(9), 
+                        ('Dec_det').ljust(8), 
+                        ('RA_cat').ljust(9),
+                        ('Dec_det').ljust(8), 
+                        ('Dist').ljust(4)))
         f_match.flush()
     non_sortable_cols = [7,8,9,10]
     non_sortable_cols_cont = [6,7,8]
