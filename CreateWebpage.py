@@ -99,7 +99,7 @@ class CreateWebpage(object):
                               'height="240">%d</td>' %(value)))
                 if isinstance(value,float):
                     s.append(('<td  class="axe" ' 
-                              'height="240">%0.3f</td>' %(value)))
+                              'height="240">%0.5f</td>' %(value)))
             if key.lower().split('_')[0] == "link":
                 if len(value)!=2:
                     print(('[ERROR] Value in Dictionary should include two '

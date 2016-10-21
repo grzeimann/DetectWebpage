@@ -20,14 +20,15 @@ import textwrap
 import CreateWebpage as CW
 from collections import OrderedDict
 from pyhetdex.het.ifu_centers import IFUCenter
-from astropy.stats import biweight_location, biweight_midvariance
+from astropy.stats import biweight_location
 from scipy.ndimage.filters import gaussian_filter
 from astropy.modeling.models import Moffat2D, Gaussian2D
 from photutils import CircularAperture, aperture_photometry
-from astropy.coordinates import SkyCoord
+from astropy.coordinates import SkyCoord, ICRS
 from astropy.nddata import Cutout2D
 from astropy.wcs import WCS
 from astropy.wcs.utils import skycoord_to_pixel
+from astropy import units as u
 from pyhetdex.het.fplane import FPlane
 from pyhetdex.coordinates.tangent_projection_astropy import TangentPlane as TP
 
@@ -259,7 +260,8 @@ def pick_image(ra, dec):
     d = np.sqrt(((ra-x)*np.cos(dec*np.pi/180.))**2+(dec-y)**2)
     ind = np.argmin(d)
     filename = op.join(image_dir,'%s%s_g_sci.fits' %(l[ind],n[ind]))
-    return filename
+    catname = op.join(op.dirname(image_dir),'%s%s_g_cat.fits' %(l[ind],n[ind]))
+    return filename, catname
     
 def get_w_as_r(seeing, gridsize, rstep, rmax, profile_name='moffat'):
     fradius = 0.75 # VIRUS
@@ -649,7 +651,7 @@ def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
 
 
 def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid, 
-                      wcs, data):
+                      wcs, data, catalog):
 
     for i, a  in enumerate(Cat['icx']):
         if args.debug:
@@ -681,6 +683,19 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
         datakeep['ra'] = []
         datakeep['dec'] = []
         ras, decs = tp.xy2raDec(x+ifuy,y+ifux)
+        c = ICRS(ras, decs, unit=(u.degree, u.degree))
+        if args.debug:
+            t1 = time.time()
+        cat = ICRS(catalog['alpha_j2000'],catalog['delta_j2000'], 
+                   unit=(u.degree, u.degree))
+        idx, d2d, d3d = c.match_to_catalog_sky(cat)
+        if args.debug:
+            t2 = time.time()
+            print("Time Taken matching catalogs: %0.2f" %(t2-t1))
+            print(d2d)
+            print(d2d*3600.)
+            print(idx)
+            print(cat[idx])
         if sn>1:
             for side in SIDE:
                 for dither in xrange(len(Di.dx)):
@@ -827,9 +842,10 @@ def main():
             if args.goodsn:
                 image_fn='/work/03564/stevenf/maverick/GOODSN/gn_acs_old_f435w_060mas_v2_drz.fits'
             else:
-                image_fn = pick_image(args.ra, args.dec)
+                image_fn, cat_fn = pick_image(args.ra, args.dec)
             wcs = WCS(image_fn)
             data = fits.open(image_fn)[0].data
+            catalog = fits.open(cat_fn)[1].data
             if not op.exists('images'):
                 os.mkdir('images')
             if args.webid is None:
@@ -874,7 +890,7 @@ def main():
                             print("No continuum sources for specid %s" %specid)
                     else:
                         make_continuum_row(Cat1, f_cont_webpage, args, D, Di, ifux, 
-                                           ifuy, IFU, tp, specid, wcs, data)
+                                           ifuy, IFU, tp, specid, wcs, data. catalog)
                     
                 if op.exists(detect_fn):
                     Cat = np.loadtxt(detect_fn, dtype={'names': ('NR', 'ID', 'XS', 
