@@ -37,7 +37,7 @@ plt.ioff()
 
 
 dist_thresh = 2. # Fiber Distance
-sn_cut = 4.0 # S/N Cut
+sn_cut = 5.0 # S/N Cut
 xw = 24 # image width in x-dir 
 yw = 10 # image width in y-dir
 res = [3,9]
@@ -357,6 +357,7 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
     xc, yc = skycoord_to_pixel(position, wcs=cutout.wcs)
     if rac is not None:
         xc2, yc2 = skycoord_to_pixel(position2, wcs=cutout.wcs)
+        print((xc2-xc)*pixsize_x, (yc2-yc)*pixsize_x)
         plt.scatter((xc2-xc)*pixsize_x, (yc2-yc)*pixsize_x, marker='x', c='g', s=35)
     plt.scatter(0., 0.,marker='x',c='r',s=35)
     circle = plt.Circle((0., 0.), radius=2., fc='none', 
