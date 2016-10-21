@@ -329,7 +329,8 @@ def build_spec_image(datakeep, outfile, cwave, dwave=1.0, cmap=None,
 
 
 def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
-                      cmap=None, sz=10., debug=False, args=None):
+                      cmap=None, sz=10., debug=False, args=None, rac=None,
+                      decc=None):
     if not cmap:
         # Default cmap is gray
         cmap = plt.get_cmap('gray_r')
@@ -341,6 +342,8 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
                  reverse=True)
     size = int(sz / pixsize_x)
     position = SkyCoord(ras, decs, unit="deg", frame='fk5')   
+    if rac is not None:
+        position2 = SkyCoord(ras, decs, unit="deg", frame='fk5')   
     cutout = Cutout2D(data, position, (size,size), wcs=wcs)
     fig = plt.figure(figsize=(4,4))
     if args.goodsn:
@@ -352,6 +355,9 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
     plt.imshow(cutout.data,origin='lower',interpolation='nearest',vmin=vmin,vmax=vmax, 
                cmap=cmap, extent=[-sz/2.,sz/2.,-sz/2.,sz/2.])
     xc, yc = skycoord_to_pixel(position, wcs=cutout.wcs)
+    if rac is not None:
+        xc2, yc2 = skycoord_to_pixel(position2, wcs=cutout.wcs)
+        plt.scatter((xc2-xc)*pixsize_x, (yc2-yc)*pixsize_x, marker='x', c='g', s=35)
     plt.scatter(0., 0.,marker='x',c='r',s=35)
     circle = plt.Circle((0., 0.), radius=2., fc='none', 
                             ec='r', zorder=2, alpha=1.0)
@@ -694,7 +700,8 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
             t2 = time.time()
             print("Time Taken matching catalogs: %0.2f" %(t2-t1))
             print(d2d.arcsec)
-            print(cat[idx].ra, cat[idx].dec)
+            print(catalog['alpha_j2000'][idx], catalog['delta_j2000'][idx], 
+                  catalog['mag_auto'][idx])
         if sn>1:
             for side in SIDE:
                 for dither in xrange(len(Di.dx)):
@@ -798,7 +805,9 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                             % (op.basename(args.folder), specid, 
                                Cat['ID'][i]))
                 make_image_cutout(datakeep, data, wcs, ras, decs, 
-                                  outfile_cut, debug=args.debug, args=args)
+                                  outfile_cut, debug=args.debug, args=args,
+                                  rac=catalog['alpha_j2000'][idx], 
+                                  decc=catalog['delta_j2000'][idx])
                 if args.debug:
                     t2 = time.time()
                     print("Time Taken Making Image Cutout: %0.2f" %(t2-t1))
