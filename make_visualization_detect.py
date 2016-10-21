@@ -861,13 +861,13 @@ def main():
     if args.create_ending:
         webpage_name = 'Detect_Visualization_' + op.basename(args.folder)+'_ending'+ '_emis'
     with open(match_catalog,'w') as f_match:
-        f_match.write('%s   %s   %s   %s   %s   %s   %s   %s\n'
-                      % ('Field'.ljust(9), 'SPECID'.ljust(9), ('RA_det').ljust(9), 
-                        ('Dec_det').ljust(8), 
-                        ('RA_cat').ljust(9),
-                        ('Dec_det').ljust(8),
-                        ('g-mag').ljust(8), 
-                        ('Dist').ljust(4)))
+#        f_match.write('%s   %s   %s   %s   %s   %s   %s   %s\n'
+#                      % ('Field'.ljust(9), 'SPECID'.ljust(9), ('RA_det').ljust(9), 
+#                        ('Dec_det').ljust(8), 
+#                        ('RA_cat').ljust(9),
+#                        ('Dec_det').ljust(8),
+#                        ('g-mag').ljust(8), 
+#                        ('Dist').ljust(4)))
         f_match.flush()
     non_sortable_cols = [7,8,9,10]
     non_sortable_cols_cont = [6,7,8]
