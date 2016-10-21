@@ -699,9 +699,9 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
         idx2, d2d2, d3d2 = match_coordinates_sky(c, cat, nthneighbor=2)
         
         within = []
-        if d2d.arsec[0] < 3.:
+        if d2d.arcsec[0] < 3.:
             within.append(idx)
-        if d2d.arsec[0] < 3.:
+        if d2d2.arcsec[0] < 3.:
             within.append(idx2)        
         if args.debug:
             t2 = time.time()
