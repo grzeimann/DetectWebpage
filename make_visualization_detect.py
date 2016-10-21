@@ -704,7 +704,7 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
             if d2d.arcsec[0] < 5.:
                 within.append(idx)
                 f_match.write('%s   %s   %s   %s   %s   %s   %s\n'
-                        % (field, specid, ("%0.5f" %ras).rjust(9), 
+                        % ((field).rjust(9), (specid).rjust(9), ("%0.5f" %ras).rjust(9), 
                            ("%0.5f" %decs).rjust(8), 
                            ("%0.5f" %catalog['alpha_j2000'][idx]).rjust(9),
                            ("%0.5f" %catalog['delta_j2000'][idx]).rjust(8), 
@@ -858,6 +858,14 @@ def main():
         webpage_name = 'Detect_Visualization_' + op.basename(args.folder)+'_header'+ '_emis'
     if args.create_ending:
         webpage_name = 'Detect_Visualization_' + op.basename(args.folder)+'_ending'+ '_emis'
+    with open(match_catalog,'w') as f_match:
+        f_match.write('%s   %s   %s   %s   %s   %s   %s\n'
+                      % ('Field'.rjust(9), 'SPECID'.rjust(9), ('RA_det').rjust(9), 
+                        ('Dec_det').rjust(8), 
+                        ('RA_cat').rjust(9),
+                        ('Dec_det').rjust(8), 
+                        ('Dist').rjust(4)))
+        f_match.flush()
     non_sortable_cols = [7,8,9,10]
     non_sortable_cols_cont = [6,7,8]
     with open(webpage_name+'.html', 'w') as f_webpage,\
