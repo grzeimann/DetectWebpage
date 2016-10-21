@@ -703,16 +703,22 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
             within = []
             if d2d.arcsec[0] < 5.:
                 within.append(idx)
-                f_match.write('%s   %s   %09.5f   %08.5f    %09.5f   %08.5f   %04.2f\n'
-                        % (field, specid, ras, decs, catalog['alpha_j2000'][idx],
-                           catalog['delta_j2000'][idx], d2d.arcsec[0]))
+                f_match.write('%s   %s   %s   %s   %s   %s   %s\n'
+                        % (field, specid, ("%0.5f" %ras).rjust(9), 
+                           ("%0.5f" %decs).rjust(8), 
+                           ("%0.5f" %catalog['alpha_j2000'][idx]).rjust(9),
+                           ("%0.5f" %catalog['delta_j2000'][idx]).rjust(8), 
+                           ("%0.2f" %d2d.arcsec[0]).rjust(4)))
                 f_match.flush()
                
             if d2d2.arcsec[0] < 5.:
                 within.append(idx2)  
-                f_match.write('%s   %s   %09.5f   %08.5f    %09.5f   %08.5f   %04.2f\n'
-                        % (field, specid, ras, decs, catalog['alpha_j2000'][idx2],
-                           catalog['delta_j2000'][idx2], d2d2.arcsec[0]))
+                f_match.write('%s   %s   %s   %s   %s   %s   %s\n'
+                        % (field, specid, ("%0.5f" %ras).rjust(9), 
+                           ("%0.5f" %decs).rjust(8), 
+                           ("%0.5f" %catalog['alpha_j2000'][idx2]).rjust(9),
+                           ("%0.5f" %catalog['delta_j2000'][idx2]).rjust(8), 
+                           ("%0.2f" %d2d2.arcsec[0]).rjust(4)))
                 f_match.flush()
             if args.debug:
                 t2 = time.time()
