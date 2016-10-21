@@ -660,7 +660,6 @@ def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
 
 def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid, 
                       wcs, data, catalog):
-
     for i, a  in enumerate(Cat['icx']):
         if args.debug:
             t1 = time.time()
@@ -696,11 +695,11 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
             t1 = time.time()
         cat = SkyCoord(catalog['alpha_j2000'],catalog['delta_j2000'], 
                    unit=(u.degree, u.degree))
-        idx, d2d, d3d = match_coordinates_sky(c, cat)
+        idx, d2d, d3d = match_coordinates_sky(c, cat, nthneighbor=2)
         if args.debug:
             t2 = time.time()
             print("Time Taken matching catalogs: %0.2f" %(t2-t1))
-            print(d2d.arcsec)
+            print(d2d.arcsec[0])
             print(catalog['alpha_j2000'][idx], catalog['delta_j2000'][idx], 
                   catalog['mag_auto'][idx])
         if sn>1:
