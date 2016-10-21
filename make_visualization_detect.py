@@ -834,7 +834,7 @@ def main():
                 CW.CreateWebpage.writeColumnNames(f_webpage,columnnames,non_sortable_cols)
                 CW.CreateWebpage.writeHeader(f_cont_webpage,webpage_name)
                 CW.CreateWebpage.writeColumnNames(f_cont_webpage,columnnames_cont,non_sortable_cols_cont)         
-            for specid in SPECID:
+            for specid in args.specid:
                 ifux = fplane.by_ifuslot(CAM_IFUSLOT_DICT[specid]).x
                 ifuy = fplane.by_ifuslot(CAM_IFUSLOT_DICT[specid]).y
                 if args.debug:
