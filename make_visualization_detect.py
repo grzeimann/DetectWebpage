@@ -890,7 +890,7 @@ def main():
                             print("No continuum sources for specid %s" %specid)
                     else:
                         make_continuum_row(Cat1, f_cont_webpage, args, D, Di, ifux, 
-                                           ifuy, IFU, tp, specid, wcs, data. catalog)
+                                           ifuy, IFU, tp, specid, wcs, data, catalog)
                     
                 if op.exists(detect_fn):
                     Cat = np.loadtxt(detect_fn, dtype={'names': ('NR', 'ID', 'XS', 
