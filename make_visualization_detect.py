@@ -329,8 +329,8 @@ def build_spec_image(datakeep, outfile, cwave, dwave=1.0, cmap=None,
 
 
 def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
-                      cmap=None, sz=10., debug=False, args=None, rac=None,
-                      decc=None):
+                      cmap=None, sz=10., debug=False, args=None, cat=None,
+                      within=None):
     if not cmap:
         # Default cmap is gray
         cmap = plt.get_cmap('gray_r')
@@ -353,9 +353,11 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
     plt.imshow(cutout.data,origin='lower',interpolation='nearest',vmin=vmin,vmax=vmax, 
                cmap=cmap, extent=[-sz/2.,sz/2.,-sz/2.,sz/2.])
     xc, yc = skycoord_to_pixel(position, wcs=cutout.wcs)
-    if rac is not None:
-        for i in xrange(len(rac)):
-            position2 = SkyCoord(rac[i], decc[i], unit="deg", frame='fk5')   
+    if cat is not None:
+        for i in xrange(len(within)):
+            position2 = SkyCoord(cat['alpha_j2000'][within[i]], 
+                                 cat['delta_j2000'][within[i]], unit="deg", 
+                                 frame='fk5')   
             xc2, yc2 = skycoord_to_pixel(position2, wcs=cutout.wcs)
             print((xc2-xc)*pixsize_x, (yc2-yc)*pixsize_x)
             plt.scatter((xc2-xc)*pixsize_x, (yc2-yc)*pixsize_x, marker='x', c='g', s=35)
@@ -699,9 +701,9 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
         idx2, d2d2, d3d2 = match_coordinates_sky(c, cat, nthneighbor=2)
         
         within = []
-        if d2d.arcsec[0] < 3.:
+        if d2d.arcsec[0] < 5.:
             within.append(idx)
-        if d2d2.arcsec[0] < 3.:
+        if d2d2.arcsec[0] < 5.:
             within.append(idx2)        
         if args.debug:
             t2 = time.time()
@@ -813,8 +815,8 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                                Cat['ID'][i]))
                 make_image_cutout(datakeep, data, wcs, ras, decs, 
                                   outfile_cut, debug=args.debug, args=args,
-                                  rac=catalog['alpha_j2000'][within], 
-                                  decc=catalog['delta_j2000'][within])
+                                  cat=catalog, 
+                                  within=within)
                 if args.debug:
                     t2 = time.time()
                     print("Time Taken Making Image Cutout: %0.2f" %(t2-t1))
