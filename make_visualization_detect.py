@@ -808,17 +808,6 @@ def main():
         
     non_sortable_cols = [7,8,9,10]
     non_sortable_cols_cont = [6,7,8]
-    fplane = FPlane(fplane_file)
-    tp = TP(args.ra, args.dec, args.rot)
-    if args.goodsn:
-        image_fn='/work/03564/stevenf/maverick/GOODSN/gn_acs_old_f435w_060mas_v2_drz.fits'
-    else:
-        image_fn = pick_image(args.ra, args.dec)
-
-    wcs = WCS(image_fn)
-    data = fits.open(image_fn)[0].data
-    if not op.exists('images'):
-        os.mkdir('images')
     with open(webpage_name+'.html', 'w') as f_webpage,\
          open(webpage_name+'_cont.html', 'w') as f_cont_webpage:
         if args.create_header:
@@ -830,6 +819,16 @@ def main():
             CW.CreateWebpage.writeEnding(f_webpage)     
             CW.CreateWebpage.writeEnding(f_cont_webpage)
         else:
+            fplane = FPlane(fplane_file)
+            tp = TP(args.ra, args.dec, args.rot)
+            if args.goodsn:
+                image_fn='/work/03564/stevenf/maverick/GOODSN/gn_acs_old_f435w_060mas_v2_drz.fits'
+            else:
+                image_fn = pick_image(args.ra, args.dec)
+            wcs = WCS(image_fn)
+            data = fits.open(image_fn)[0].data
+            if not op.exists('images'):
+                os.mkdir('images')
             if args.webid is None:
                 CW.CreateWebpage.writeHeader(f_webpage,webpage_name)
                 CW.CreateWebpage.writeColumnNames(f_webpage,columnnames,non_sortable_cols)
