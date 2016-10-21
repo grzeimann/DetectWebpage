@@ -151,52 +151,6 @@ class ParseDither():
                 self.norm.append(float(_norm))
                 self.airmass.append(float(_airmass))
 
-class ParseDetect():
-    """
-    Parse the detect file from Karl's Output
-
-    Parameters
-    ----------
-    detect_file : string
-        file containing the detect output for a field.
-
-    """
-
-    def __init__(self, detect_file):
-        self._absfname = op.abspath(detect_file)
-        self.rah, self.dech= [], []
-        self.ifuslot, self.sn = [], []
-        self.chi2, self.wave, self.flux = [], [], []
-        self.file, self.nr, self.id = [], [], []
-        self._read_dectect(detect_file)
-
-    def _read_detect(self, detect_file):
-        """
-        Read the detect file from Karl
-
-        Parameters
-        ----------
-        detect_file : string
-            file containing the detected sources
-        """
-        with open(detect_file, 'r') as f:
-            f = ft.skip_comments(f)
-            for l in f:
-                try:
-                    _rah, _dech, _ifuslot, _sn, _chi2, _wave, _flux, _file, _nr, _id = l.split()
-                except ValueError:  # skip empty or incomplete lines
-                    pass
-                self.rah.append(float(_rah))
-                self.dech.append(float(_dech))
-                self.ifuslot.append(int(_ifuslot))
-                self.sn.append(float(_sn))
-                self.chi2.append(float(_chi2))
-                self.wave.append(float(_wave))
-                self.flux.append(float(_flux))
-                self.file.append(_file.split(':')[0])
-                self.nr.append(int(_nr))
-                self.id.append(int(_id))
-
 def parse_args(argv=None):
     """Parse the command line arguments
 
@@ -220,11 +174,7 @@ def parse_args(argv=None):
 
     parser.add_argument("--dither_file", nargs='?', type=str, 
                         help='''Dither File''', 
-                        default='dither.txt')
-
-    parser.add_argument("--detect_file", nargs='?', type=str, 
-                        help='''Detect File ''', 
-                        default='detect.txt')           
+                        default='dither.txt')         
 
     parser.add_argument("--ra", nargs='?', type=float, 
                         help='''ra''', 
@@ -237,42 +187,51 @@ def parse_args(argv=None):
     parser.add_argument("--rot", nargs='?', type=float, 
                         help='''rotation''', 
                         default=None)
+                        
+    parser.add_argument("--webid", nargs='?', type=str, 
+                        help='''WebID for joining later.''', 
+                        default=None)
+                        
+    parser.add_argument("--specid", nargs='?', type=str, 
+                        help='''List of SPECID's for processing. 
+                        Ex: "020,008".''', default = None)
 
     parser.add_argument("--goodsn", help='''Goods-N?''',
                         action="count", default=0)   
 
+    parser.add_argument("--create_header", help='''Create Just Header.''',
+                        action="count", default=0)  
+
+    parser.add_argument("--create_ending", help='''Create Just Ending.''',
+                        action="count", default=0) 
+
     parser.add_argument("--debug", help='''Debug''',
                         action="count", default=0)   
                                                                          
-    args = parser.parse_args(args=argv)
+    args = parser.parse_args(args=argv) 
 
     # Check that the arguments are filled
-    #if args.detect_file is not None:
-    #    args.detect_file = args.detect_file.replace(" ", "").split(',')
-    #else:
-    #    msg = 'No detect file was provided'
-    #    parser.error(msg)         
-
-    # Check that the arguments are filled
-
-    if args.ra is None:
-        msg = 'No RA was provided'
-        parser.error(msg)
-    if args.dec is None:
-        msg = 'No Dec was provided'
-        parser.error(msg)
-    if args.rot is None:
-        msg = 'No Parangle was provided'
-        parser.error(msg)
+    if not args.create_header and not args.create_ending:
+        if args.ra is None:
+            msg = 'No RA was provided'
+            parser.error(msg)
+        if args.dec is None:
+            msg = 'No Dec was provided'
+            parser.error(msg)
+        if args.rot is None:
+            msg = 'No Parangle was provided'
+            parser.error(msg)
     if args.folder is None:
         msg = 'No folder was provided'
         parser.error(msg)
-    if args.dither_file is None:
-        msg = 'No dither file was provided'
-        parser.error(msg)
+    # Check that the arguments are filled
+    if args.specid:
+        args.specid = args.specid.replace(" ", "").split(',')
     else:
-        args.dither_file = args.dither_file
- 
+        args.specid = SPECID 
+    if args.create_header and args.create_ending:
+        msg = 'Pick create_header or create_ending, not both'
+        parser.error(msg)        
     return args
     
 def pick_image(ra, dec):
@@ -838,7 +797,15 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
    
 def main():
     args = parse_args()
-    webpage_name = 'Detect Visualization_' + op.basename(args.folder)
+    if args.webid is None:
+        webpage_name = 'Detect Visualization_' + op.basename(args.folder)
+    else:
+        webpage_name = 'Detect Visualization_' + op.basename(args.folder) + '_' + args.webid
+    if args.create_header:
+        webpage_name = 'Detect Visualization_' + op.basename(args.folder)+'_header'
+    if args.create_ending:
+        webpage_name = 'Detect Visualization_' + op.basename(args.folder)+'_ending'
+        
     non_sortable_cols = [7,8,9,10]
     non_sortable_cols_cont = [6,7,8]
     fplane = FPlane(fplane_file)
@@ -854,69 +821,79 @@ def main():
         os.mkdir('images')
     with open(webpage_name+'.html', 'w') as f_webpage,\
          open(webpage_name+'_cont.html', 'w') as f_cont_webpage:
-        CW.CreateWebpage.writeHeader(f_webpage,webpage_name)
-        CW.CreateWebpage.writeColumnNames(f_webpage,columnnames,non_sortable_cols)
-        CW.CreateWebpage.writeHeader(f_cont_webpage,webpage_name)
-        CW.CreateWebpage.writeColumnNames(f_cont_webpage,columnnames_cont,non_sortable_cols_cont)
-        for specid in SPECID:
-            ifux = fplane.by_ifuslot(CAM_IFUSLOT_DICT[specid]).x
-            ifuy = fplane.by_ifuslot(CAM_IFUSLOT_DICT[specid]).y
-            if args.debug:
-                print(specid)
-            ifu_fn = op.join(virus_config, 'IFUcen_files', 'IFUcen_VIFU' + CAM_IFU_DICT[specid] + '.txt')
-            if not op.exists(ifu_fn):
-                ifu_fn = op.join(virus_config, 'IFUcen_files', 'IFUcen_HETDEX.txt')
-            if args.debug:
-                print(ifu_fn)
-            IFU = IFUCenter(ifu_fn)
-            Di = ParseDither(op.join(args.folder, 'c'+specid, args.dither_file))
-            D = {}
-            for s in SIDE:
-                D[s] = Distortion(op.join(args.folder, 'c'+specid, 
-                                     Di.deformer[0]+'_%s.dist' %s))
-            detect_fn = op.join(args.folder, 'c'+specid, 'detect_line.dat')
-            detect_cont_fn = op.join(args.folder, 'c'+specid, 'detect_cont.dat')
-            if op.exists(detect_cont_fn):
-                Cat1 = np.loadtxt(detect_cont_fn, dtype={'names': ('ID', 'icx', 
-                                                             'icy', 'sigma', 'fwhm_xy', 
-                                                             'a', 'b', 
-                                                             'pa', 'ir1', 
-                                                             'ka', 'kb', 
-                                                             'xmin', 'xmax', 
-                                                             'ymin', ' ymax', 
-                                                             'zmin', 'zmax'),
-                                             'formats': ('i4', np.float, np.float,
-                                                         np.float, np.float, np.float, np.float, 
-                                                         np.float, np.float, np.float, np.float,
-                                                         np.float, np.float, np.float, np.float,
-                                                         np.float, np.float)}, ndmin=1)
-                if not Cat1.size:
-                    if args.debug:
-                        print("No continuum sources for specid %s" %specid)
-                else:
-                    make_continuum_row(Cat1, f_cont_webpage, args, D, Di, ifux, 
-                                       ifuy, IFU, tp, specid, wcs, data)
-                
-            if op.exists(detect_fn):
-                Cat = np.loadtxt(detect_fn, dtype={'names': ('NR', 'ID', 'XS', 
-                                                             'YS', 'l', 'z', 
-                                                             'dataflux', 'modflux', 
-                                                             'fluxfrac', 'sigma', 
-                                                             'chi2', 'chi2s', 
-                                                             'chi2w', 'gammq', 
-                                                             'gammq_s', ' eqw', 
-                                                             'cont'),
-                                             'formats': ('i4', 'i4', np.float, np.float,
-                                                         np.float, np.float, np.float, np.float, 
-                                                         np.float, np.float, np.float, np.float,
-                                                         np.float, np.float, np.float, np.float,
-                                                         np.float)},ndmin=1)
-                if not Cat.size:
-                    continue
-                make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, 
-                                  IFU, tp, specid, wcs, data)
-
-        CW.CreateWebpage.writeEnding(f_webpage)     
-        CW.CreateWebpage.writeEnding(f_cont_webpage)      
+        if args.create_header:
+            CW.CreateWebpage.writeHeader(f_webpage,webpage_name)
+            CW.CreateWebpage.writeColumnNames(f_webpage,columnnames,non_sortable_cols)
+            CW.CreateWebpage.writeHeader(f_cont_webpage,webpage_name)
+            CW.CreateWebpage.writeColumnNames(f_cont_webpage,columnnames_cont,non_sortable_cols_cont) 
+        elif args.create_ending:
+            CW.CreateWebpage.writeEnding(f_webpage)     
+            CW.CreateWebpage.writeEnding(f_cont_webpage)
+        else:
+            if args.webid is None:
+                CW.CreateWebpage.writeHeader(f_webpage,webpage_name)
+                CW.CreateWebpage.writeColumnNames(f_webpage,columnnames,non_sortable_cols)
+                CW.CreateWebpage.writeHeader(f_cont_webpage,webpage_name)
+                CW.CreateWebpage.writeColumnNames(f_cont_webpage,columnnames_cont,non_sortable_cols_cont)         
+            for specid in SPECID:
+                ifux = fplane.by_ifuslot(CAM_IFUSLOT_DICT[specid]).x
+                ifuy = fplane.by_ifuslot(CAM_IFUSLOT_DICT[specid]).y
+                if args.debug:
+                    print(specid)
+                ifu_fn = op.join(virus_config, 'IFUcen_files', 'IFUcen_VIFU' + CAM_IFU_DICT[specid] + '.txt')
+                if not op.exists(ifu_fn):
+                    ifu_fn = op.join(virus_config, 'IFUcen_files', 'IFUcen_HETDEX.txt')
+                if args.debug:
+                    print(ifu_fn)
+                IFU = IFUCenter(ifu_fn)
+                Di = ParseDither(op.join(args.folder, 'c'+specid, args.dither_file))
+                D = {}
+                for s in SIDE:
+                    D[s] = Distortion(op.join(args.folder, 'c'+specid, 
+                                         Di.deformer[0]+'_%s.dist' %s))
+                detect_fn = op.join(args.folder, 'c'+specid, 'detect_line.dat')
+                detect_cont_fn = op.join(args.folder, 'c'+specid, 'detect_cont.dat')
+                if op.exists(detect_cont_fn):
+                    Cat1 = np.loadtxt(detect_cont_fn, dtype={'names': ('ID', 'icx', 
+                                                                 'icy', 'sigma', 'fwhm_xy', 
+                                                                 'a', 'b', 
+                                                                 'pa', 'ir1', 
+                                                                 'ka', 'kb', 
+                                                                 'xmin', 'xmax', 
+                                                                 'ymin', ' ymax', 
+                                                                 'zmin', 'zmax'),
+                                                 'formats': ('i4', np.float, np.float,
+                                                             np.float, np.float, np.float, np.float, 
+                                                             np.float, np.float, np.float, np.float,
+                                                             np.float, np.float, np.float, np.float,
+                                                             np.float, np.float)}, ndmin=1)
+                    if not Cat1.size:
+                        if args.debug:
+                            print("No continuum sources for specid %s" %specid)
+                    else:
+                        make_continuum_row(Cat1, f_cont_webpage, args, D, Di, ifux, 
+                                           ifuy, IFU, tp, specid, wcs, data)
+                    
+                if op.exists(detect_fn):
+                    Cat = np.loadtxt(detect_fn, dtype={'names': ('NR', 'ID', 'XS', 
+                                                                 'YS', 'l', 'z', 
+                                                                 'dataflux', 'modflux', 
+                                                                 'fluxfrac', 'sigma', 
+                                                                 'chi2', 'chi2s', 
+                                                                 'chi2w', 'gammq', 
+                                                                 'gammq_s', ' eqw', 
+                                                                 'cont'),
+                                                 'formats': ('i4', 'i4', np.float, np.float,
+                                                             np.float, np.float, np.float, np.float, 
+                                                             np.float, np.float, np.float, np.float,
+                                                             np.float, np.float, np.float, np.float,
+                                                             np.float)},ndmin=1)
+                    if not Cat.size:
+                        continue
+                    make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, 
+                                      IFU, tp, specid, wcs, data)
+            if args.webid is None:
+                CW.CreateWebpage.writeEnding(f_webpage)     
+                CW.CreateWebpage.writeEnding(f_cont_webpage)      
 if __name__ == '__main__':
     main() 
