@@ -693,10 +693,8 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
         if args.debug:
             t2 = time.time()
             print("Time Taken matching catalogs: %0.2f" %(t2-t1))
-            print(d2d)
-            print(d2d*3600.)
-            print(idx)
-            print(cat[idx])
+            print(d2d.arcsec)
+            print(cat[idx].ra, cat[idx].dec)
         if sn>1:
             for side in SIDE:
                 for dither in xrange(len(Di.dx)):
