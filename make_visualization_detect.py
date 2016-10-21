@@ -708,6 +708,7 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                            ("%0.5f" %decs).ljust(8), 
                            ("%0.5f" %catalog['alpha_j2000'][idx]).ljust(9),
                            ("%0.5f" %catalog['delta_j2000'][idx]).ljust(8), 
+                           ("%0.3f" %catalog['mag_auto'][idx]).ljust(8),
                            ("%0.2f" %d2d.arcsec[0]).ljust(4)))
                 f_match.flush()
                
@@ -718,6 +719,7 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                            ("%0.5f" %decs).ljust(8), 
                            ("%0.5f" %catalog['alpha_j2000'][idx2]).ljust(9),
                            ("%0.5f" %catalog['delta_j2000'][idx2]).ljust(8), 
+                           ("%0.3f" %catalog['mag_auto'][idx2]).ljust(8),
                            ("%0.2f" %d2d2.arcsec[0]).ljust(4)))
                 f_match.flush()
             if args.debug:
@@ -863,7 +865,8 @@ def main():
                       % ('Field'.ljust(9), 'SPECID'.ljust(9), ('RA_det').ljust(9), 
                         ('Dec_det').ljust(8), 
                         ('RA_cat').ljust(9),
-                        ('Dec_det').ljust(8), 
+                        ('Dec_det').ljust(8),
+                        ('g-mag').ljust(8) 
                         ('Dist').ljust(4)))
         f_match.flush()
     non_sortable_cols = [7,8,9,10]
