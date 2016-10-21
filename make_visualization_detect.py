@@ -5,6 +5,8 @@
 """
 
 from __future__ import print_function
+import matplotlib
+matplotlib.use('agg')
 import argparse as ap
 from pyhetdex.cure.distortion import Distortion
 import pyhetdex.tools.files.file_tools as ft
@@ -28,8 +30,7 @@ from astropy.wcs import WCS
 from astropy.wcs.utils import skycoord_to_pixel
 from pyhetdex.het.fplane import FPlane
 from pyhetdex.coordinates.tangent_projection_astropy import TangentPlane as TP
-import matplotlib
-matplotlib.use('agg')
+
 plt.ioff()
 
 
