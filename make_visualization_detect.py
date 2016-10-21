@@ -343,7 +343,7 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
     size = int(sz / pixsize_x)
     position = SkyCoord(ras, decs, unit="deg", frame='fk5')   
     if rac is not None:
-        position2 = SkyCoord(ras, decs, unit="deg", frame='fk5')   
+        position2 = SkyCoord(rac, decc, unit="deg", frame='fk5')   
     cutout = Cutout2D(data, position, (size,size), wcs=wcs)
     fig = plt.figure(figsize=(4,4))
     if args.goodsn:
