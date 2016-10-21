@@ -37,7 +37,7 @@ plt.ioff()
 
 
 dist_thresh = 2. # Fiber Distance
-sn_cut = 5.0 # S/N Cut
+sn_cut = 4.0 # S/N Cut
 xw = 24 # image width in x-dir 
 yw = 10 # image width in y-dir
 res = [3,9]
