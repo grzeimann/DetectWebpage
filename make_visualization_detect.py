@@ -798,14 +798,14 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
 def main():
     args = parse_args()
     if args.webid is None:
-        webpage_name = 'Detect Visualization_' + op.basename(args.folder)+'_emis'
+        webpage_name = 'Detect_Visualization_' + op.basename(args.folder)+'_emis'
     else:
-        webpage_name = 'Detect Visualization_' + op.basename(args.folder) + '_' + args.webid + '_emis'
+        webpage_name = 'Detect_Visualization_' + op.basename(args.folder) + '_' + args.webid + '_emis'
     if args.create_header:
-        webpage_name = 'Detect Visualization_' + op.basename(args.folder)+'_header'+ '_emis'
+        webpage_name = 'Detect_Visualization_' + op.basename(args.folder)+'_header'+ '_emis'
     if args.create_ending:
-        webpage_name = 'Detect Visualization_' + op.basename(args.folder)+'_ending'+ '_emis'
-        
+        webpage_name = 'Detect_Visualization_' + op.basename(args.folder)+'_ending'+ '_emis'
+    plt.ioff()    
     non_sortable_cols = [7,8,9,10]
     non_sortable_cols_cont = [6,7,8]
     with open(webpage_name+'.html', 'w') as f_webpage,\
