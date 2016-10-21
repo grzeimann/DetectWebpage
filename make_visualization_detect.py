@@ -798,18 +798,18 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
 def main():
     args = parse_args()
     if args.webid is None:
-        webpage_name = 'Detect Visualization_' + op.basename(args.folder)
+        webpage_name = 'Detect Visualization_' + op.basename(args.folder)+'_emis'
     else:
-        webpage_name = 'Detect Visualization_' + op.basename(args.folder) + '_' + args.webid
+        webpage_name = 'Detect Visualization_' + op.basename(args.folder) + '_' + args.webid + '_emis'
     if args.create_header:
-        webpage_name = 'Detect Visualization_' + op.basename(args.folder)+'_header'
+        webpage_name = 'Detect Visualization_' + op.basename(args.folder)+'_header'+ '_emis'
     if args.create_ending:
-        webpage_name = 'Detect Visualization_' + op.basename(args.folder)+'_ending'
+        webpage_name = 'Detect Visualization_' + op.basename(args.folder)+'_ending'+ '_emis'
         
     non_sortable_cols = [7,8,9,10]
     non_sortable_cols_cont = [6,7,8]
     with open(webpage_name+'.html', 'w') as f_webpage,\
-         open(webpage_name+'_cont.html', 'w') as f_cont_webpage:
+         open(webpage_name[:-5]+'_cont.html', 'w') as f_cont_webpage:
         if args.create_header:
             CW.CreateWebpage.writeHeader(f_webpage,webpage_name)
             CW.CreateWebpage.writeColumnNames(f_webpage,columnnames,non_sortable_cols)
