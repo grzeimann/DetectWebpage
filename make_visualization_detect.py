@@ -28,7 +28,8 @@ from astropy.wcs import WCS
 from astropy.wcs.utils import skycoord_to_pixel
 from pyhetdex.het.fplane import FPlane
 from pyhetdex.coordinates.tangent_projection_astropy import TangentPlane as TP
-
+import matplotlib
+matplotlib.use('agg')
 plt.ioff()
 
 
