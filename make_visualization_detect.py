@@ -28,6 +28,9 @@ from astropy.wcs import WCS
 from astropy.wcs.utils import skycoord_to_pixel
 from pyhetdex.het.fplane import FPlane
 from pyhetdex.coordinates.tangent_projection_astropy import TangentPlane as TP
+matplotlib.use('Agg')
+
+plt.ioff()
 
 
 dist_thresh = 2. # Fiber Distance
@@ -805,7 +808,6 @@ def main():
         webpage_name = 'Detect_Visualization_' + op.basename(args.folder)+'_header'+ '_emis'
     if args.create_ending:
         webpage_name = 'Detect_Visualization_' + op.basename(args.folder)+'_ending'+ '_emis'
-    plt.ioff()    
     non_sortable_cols = [7,8,9,10]
     non_sortable_cols_cont = [6,7,8]
     with open(webpage_name+'.html', 'w') as f_webpage,\
