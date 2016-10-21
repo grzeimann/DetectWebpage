@@ -695,11 +695,18 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
             t1 = time.time()
         cat = SkyCoord(catalog['alpha_j2000'],catalog['delta_j2000'], 
                    unit=(u.degree, u.degree))
-        idx, d2d, d3d = match_coordinates_sky(c, cat, nthneighbor=2)
+        idx, d2d, d3d = match_coordinates_sky(c, cat, nthneighbor=1)
+        idx2, d2d2, d3d2 = match_coordinates_sky(c, cat, nthneighbor=2)
+        
+        within = []
+        if d2d.arsec[0] < 3.:
+            within.append(idx)
+        if d2d.arsec[0] < 3.:
+            within.append(idx2)        
         if args.debug:
             t2 = time.time()
             print("Time Taken matching catalogs: %0.2f" %(t2-t1))
-            print(d2d.arcsec[0])
+            print(d2d.arcsec[0], d2d2.arcsec[0])
             print(catalog['alpha_j2000'][idx], catalog['delta_j2000'][idx], 
                   catalog['mag_auto'][idx])
         if sn>1:
@@ -806,8 +813,8 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                                Cat['ID'][i]))
                 make_image_cutout(datakeep, data, wcs, ras, decs, 
                                   outfile_cut, debug=args.debug, args=args,
-                                  rac=catalog['alpha_j2000'][idx], 
-                                  decc=catalog['delta_j2000'][idx])
+                                  rac=catalog['alpha_j2000'][within], 
+                                  decc=catalog['delta_j2000'][within])
                 if args.debug:
                     t2 = time.time()
                     print("Time Taken Making Image Cutout: %0.2f" %(t2-t1))
