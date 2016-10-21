@@ -714,7 +714,7 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
             if d2d2.arcsec[0] < 5.:
                 within.append(idx2)  
                 f_match.write('%s   %s   %s   %s   %s   %s   %s\n'
-                        % (field, specid, ("%0.5f" %ras).rjust(9), 
+                        % ((field).rjust(9), (specid).rjust(9), ("%0.5f" %ras).rjust(9), 
                            ("%0.5f" %decs).rjust(8), 
                            ("%0.5f" %catalog['alpha_j2000'][idx2]).rjust(9),
                            ("%0.5f" %catalog['delta_j2000'][idx2]).rjust(8), 
