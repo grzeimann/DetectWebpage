@@ -24,7 +24,8 @@ from astropy.stats import biweight_location
 from scipy.ndimage.filters import gaussian_filter
 from astropy.modeling.models import Moffat2D, Gaussian2D
 from photutils import CircularAperture, aperture_photometry
-from astropy.coordinates import SkyCoord, ICRS
+from astropy.coordinates import SkyCoord
+from astropy.coordinates import match_coordinates_sky
 from astropy.nddata import Cutout2D
 from astropy.wcs import WCS
 from astropy.wcs.utils import skycoord_to_pixel
@@ -683,12 +684,12 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
         datakeep['ra'] = []
         datakeep['dec'] = []
         ras, decs = tp.xy2raDec(x+ifuy,y+ifux)
-        c = ICRS(ras, decs, unit=(u.degree, u.degree))
+        c = SkyCoord(ras, decs, unit=(u.degree, u.degree))
         if args.debug:
             t1 = time.time()
-        cat = ICRS(catalog['alpha_j2000'],catalog['delta_j2000'], 
+        cat = SkyCoord(catalog['alpha_j2000'],catalog['delta_j2000'], 
                    unit=(u.degree, u.degree))
-        idx, d2d, d3d = c.match_to_catalog_sky(cat)
+        idx, d2d, d3d = match_coordinates_sky(c, cat)
         if args.debug:
             t2 = time.time()
             print("Time Taken matching catalogs: %0.2f" %(t2-t1))
