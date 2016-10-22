@@ -708,7 +708,7 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                            ("%0.5f" %decs).ljust(8), 
                            ("%0.5f" %catalog['alpha_j2000'][idx]).ljust(9),
                            ("%0.5f" %catalog['delta_j2000'][idx]).ljust(8), 
-                           ("%0.3f" %catalog['mag_auto'][idx]).ljust(8),
+                           ("%0.3f" %(catalog['mag_auto'][idx]+25.07)).ljust(8),
                            ("%0.2f" %d2d.arcsec[0]).ljust(4)))
                 f_match.flush()
                
@@ -719,7 +719,7 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                            ("%0.5f" %decs).ljust(8), 
                            ("%0.5f" %catalog['alpha_j2000'][idx2]).ljust(9),
                            ("%0.5f" %catalog['delta_j2000'][idx2]).ljust(8), 
-                           ("%0.3f" %catalog['mag_auto'][idx2]).ljust(8),
+                           ("%0.3f" %(catalog['mag_auto'][idx2]+25.07)).ljust(8),
                            ("%0.2f" %d2d2.arcsec[0]).ljust(4)))
                 f_match.flush()
             if args.debug:
