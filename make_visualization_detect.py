@@ -257,8 +257,7 @@ def parse_args(argv=None):
                         default='dither.txt')
 
     parser.add_argument("-sd","--scidir_date", nargs='?', type=str,
-                        help='''Science Directory Date.     [REQUIRED]
-                        Ex: \"20160412\"''', required=True, default=None)
+                        help='''Science Directory Date. Ex: \"20160412\"''', default=None)
 
     parser.add_argument("--ra", nargs='?', type=float, 
                         help='''ra''', 
@@ -304,6 +303,9 @@ def parse_args(argv=None):
             parser.error(msg)
         if args.rot is None:
             msg = 'No Parangle was provided'
+            parser.error(msg)
+        if args.scidir_date is None:
+            msg = 'No Science Directory Date was provided'
             parser.error(msg)
     if args.folder is None:
         msg = 'No folder was provided'
@@ -371,7 +373,7 @@ def build_spec_image(datakeep, outfile, cwave, dwave=1.0, cmap=None,
         cmap = plt.get_cmap('gray_r')
     if not cmap2:
         norm = plt.Normalize()
-        colors = plt.cm.viridis_r(norm(np.arange(len(datakeep['ra'])+2)))
+        colors = plt.cm.hsv(norm(np.arange(len(datakeep['ra'])+2)))
     N = len(datakeep['xi'])
     rm = 0.2
     fig = plt.figure(figsize=(5,3))
@@ -387,9 +389,9 @@ def build_spec_image(datakeep, outfile, cwave, dwave=1.0, cmap=None,
     for i in xrange(N):
 
         specplot.step(datakeep['specwave'][ind[i]], datakeep['spec'][ind[i]], 
-                          where='mid', color=colors[i,0:3])
+                          where='mid', color=colors[i,0:3],alpha=0.5)
         w1 = np.interp(datakeep['d'][ind[i]],r,w)
-        F+=(np.interp(bigwave,datakeep['specwave'][ind[i]], datakeep['spec'][ind[i]])*w1)
+        F+=(np.interp(bigwave,datakeep['specwave'][ind[i]], datakeep['spec'][ind[i]])*w1) #*(2.0 -datakeep['d'][ind[i]])
         W+=w1
         mn = np.min([mn,np.min(datakeep['spec'][ind[i]])])
         mx = np.max([mx,np.max(datakeep['spec'][ind[i]])])
@@ -414,7 +416,7 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
         cmap = plt.get_cmap('gray_r')
     if not cmap2:
         norm = plt.Normalize()
-        colors = plt.cm.viridis_r(norm(np.arange(len(datakeep['ra'])+2)))
+        colors = plt.cm.hsv(norm(np.arange(len(datakeep['ra'])+2)))
     pixsize_x = np.sqrt(wcs.wcs.cd[0,0]**2 + wcs.wcs.cd[0,1]**2)*3600. 
     ind = sorted(range(len(datakeep['d'])), key=lambda k: datakeep['d'][k], 
                  reverse=True)
@@ -442,12 +444,15 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
     circle = plt.Circle((0., 0.), radius=2., fc='none', 
                             ec='r', zorder=2, alpha=1.0)
     plt.gca().add_patch(circle)
-    for i in xrange(len(datakeep['ra'])):
+    num = len(datakeep['ra'])
+    for i in xrange(num):
         xf,yf = skycoord_to_pixel(
              SkyCoord(datakeep['ra'][ind[i]],datakeep['dec'][ind[i]], unit="deg", frame='fk5'), 
              wcs=cutout.wcs)
         circle = plt.Circle(((xf-xc)*pixsize_x, (yf-yc)*pixsize_x), radius=.75, fc='none', 
                             ec=colors[i,0:3], zorder=2, alpha=1.0)
+        plt.text((xf-xc)*pixsize_x, (yf-yc)*pixsize_x, num-i, ha='center', va='center',
+                 fontsize='x-small', color=colors[i,0:3]) #datakeep['fib'][ind[i]]
         plt.gca().add_patch(circle)
     fig.savefig(outfile,dpi=150)
     plt.close(fig)        
@@ -458,24 +463,25 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
         cmap = plt.get_cmap('gray_r')
     if not cmap2:
         norm = plt.Normalize()
-        colors = plt.cm.viridis_r(norm(np.arange(len(datakeep['ra'])+2)))
-    N = len(datakeep['xi'])
+#        colors = plt.cm.viridis_r(norm(np.arange(len(datakeep['ra'])+2)))
+        colors = plt.cm.hsv(norm(np.arange(len(datakeep['ra']) + 2)))
+    num = len(datakeep['xi'])
     bordbuff = 0.01
     borderxl = 0.05
     borderxr = 0.15
     borderyb = 0.05
     borderyt = 0.15
     dx = (1. - borderxl - borderxr) / 3.
-    dy = (1. - borderyb - borderyt) / N
+    dy = (1. - borderyb - borderyt) / num
     dx1 = (1. - borderxl - borderxr) / 3.
-    dy1 = (1. - borderyb - borderyt-N*bordbuff) / N
+    dy1 = (1. - borderyb - borderyt-num*bordbuff) / num
     Y = (yw / dy) / (xw / dx) * 5.
 
     fig = plt.figure(figsize=(5,Y),frameon=False)
 
     ind = sorted(range(len(datakeep['d'])), key=lambda k: datakeep['d'][k], 
                  reverse=True)
-    for i in xrange(N):
+    for i in xrange(num):
         borplot = plt.axes([borderxl+0.*dx, borderyb+i*dy, 3*dx, dy])
         implot = plt.axes([borderxl+2.*dx-bordbuff/3., borderyb+i*dy+bordbuff/2., dx1, dy1])
         errplot = plt.axes([borderxl+1.*dx+1*bordbuff/3., borderyb+i*dy+bordbuff/2., dx1, dy1])
@@ -536,11 +542,23 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
         S = np.where(datakeep['err'][ind[i]][yl:yh,xl:xh]<0,0.,datakeep['im'][ind[i]][yl:yh,xl:xh]).sum()
         N = np.sqrt(np.where(datakeep['err'][ind[i]][yl:yh,xl:xh]<0,0.,datakeep['err'][ind[i]][yl:yh,xl:xh]**2).sum())
         sn = S/N
-        implot.text(1.05,.55,'S/N = %0.2f' %(sn),
-                    transform=implot.transAxes,fontsize=8,color='r',
+
+        implot.text(0.9, .75, num-i,
+                    transform=implot.transAxes, fontsize=6, color=colors[i,0:3],
                     verticalalignment='bottom', horizontalalignment='left')
-        implot.text(1.05,.20,'D(") = %0.2f' %(datakeep['d'][ind[i]]),
-                    transform=implot.transAxes,fontsize=8,color='r',
+
+        implot.text(1.10,.75,'S/N = %0.2f' %(sn),
+                    transform=implot.transAxes,fontsize=6,color='r',
+                    verticalalignment='bottom', horizontalalignment='left')
+        implot.text(1.10,.55,'D(") = %0.2f' %(datakeep['d'][ind[i]]),
+                    transform=implot.transAxes,fontsize=6,color='r',
+                    verticalalignment='bottom', horizontalalignment='left')
+        implot.text(1.10, .35, 'X,Y = %d,%d' % (datakeep['xi'][ind[i]],datakeep['yi'][ind[i]]),
+                    transform=implot.transAxes, fontsize=6, color='b',
+                    verticalalignment='bottom', horizontalalignment='left')
+        implot.text(1.10, .15, 'D,S,F = %d,%s,%d' % (datakeep['dit'][ind[i]],datakeep['side'][ind[i]],
+                                                     datakeep['fib'][ind[i]]),
+                    transform=implot.transAxes, fontsize=6, color='b',
                     verticalalignment='bottom', horizontalalignment='left')
         if i==(N-1):
             implot.text(0.5,.85,'Image',
@@ -587,6 +605,9 @@ def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
         flux = Cat['dataflux'][i]
         eqw = Cat['eqw'][i]
         datakeep = {}
+        datakeep['dit'] = []
+        datakeep['side'] = []
+        datakeep['fib'] = []
         datakeep['xi'] = []
         datakeep['yi'] = []
         datakeep['xl'] = []
@@ -618,9 +639,12 @@ def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                     d = np.sqrt(dx**2 + dy**2)
                     loc = np.where(d<dist_thresh)[0]
                     for l in loc:
+                        datakeep['dit'].append(dither +1)
+                        datakeep['side'].append(side)
                         f0 = D[side].get_reference_f(l+1)
                         xi = D[side].map_wf_x(Cat['l'][i],f0)
                         yi = D[side].map_wf_y(Cat['l'][i],f0)
+                        datakeep['fib'].append(D[side].map_xy_fibernum(xi, yi))
                         xfiber = IFU.xifu[side][l]-Di.dx[dither]
                         yfiber = IFU.yifu[side][l]-Di.dy[dither]
                         xfiber += ifuy
@@ -749,6 +773,9 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
             y = Cat['icy'][i]
             sn = Cat['sigma'][i]
             datakeep = {}
+            datakeep['dit'] = []
+            datakeep['side'] = []
+            datakeep['fib'] = []
             datakeep['xi'] = []
             datakeep['yi'] = []
             datakeep['xl'] = []
@@ -816,9 +843,12 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                         d = np.sqrt(dx**2 + dy**2)
                         loc = np.where(d<dist_thresh)[0]
                         for l in loc:
+                            datakeep['dit'].append(dither + 1)
+                            datakeep['side'].append(side)
                             f0 = D[side].get_reference_f(l+1)
                             xi = D[side].map_wf_x(Cat['zmin'][i]/2.+Cat['zmax'][i]/2.,f0)
                             yi = D[side].map_wf_y(Cat['zmin'][i]/2.+Cat['zmax'][i]/2.,f0)
+                            datakeep['fib'].append(D[side].map_xy_fibernum(xi, yi))
                             xfiber = IFU.xifu[side][l]-Di.dx[dither]
                             yfiber = IFU.yifu[side][l]-Di.dy[dither]
                             xfiber += ifuy
@@ -932,8 +962,9 @@ def main():
     args = parse_args()
 
     #todo: get the date (YYYYMMDD) ... added argument, but is there a better way?
-    fplane_file = find_fplane(args.scidir_date)
-    IFUSLOT_DICT, CAM_IFU_DICT, CAM_IFUSLOT_DICT = build_fplane_dicts(fplane_file)
+    if args.scidir_date is not None:
+        fplane_file = find_fplane(args.scidir_date)
+        IFUSLOT_DICT, CAM_IFU_DICT, CAM_IFUSLOT_DICT = build_fplane_dicts(fplane_file)
 
     if args.webid is None:
         webpage_name = 'Detect_Visualization_' + op.basename(args.folder)+'_emis'
