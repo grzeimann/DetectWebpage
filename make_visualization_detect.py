@@ -32,6 +32,7 @@ from astropy.wcs.utils import skycoord_to_pixel
 from astropy import units as u
 from pyhetdex.het.fplane import FPlane
 from pyhetdex.coordinates.tangent_projection_astropy import TangentPlane as TP
+import glob
 
 plt.ioff()
 
@@ -44,64 +45,66 @@ res = [3,9]
 ww = xw*1.9 # wavelength width
 contrast = 0.5
 virus_config = '/work/03946/hetdex/maverick/virus_config'
-fplane_file = '/home/00115/gebhardt/fplane.txt' 
+fplane_file = '/home/00115/gebhardt/fplane.txt'
+fplanedir = "/work/03946/hetdex/maverick/virus_config/fplane"
 image_dir = '/work/03229/iwold/maverick/fall_field/stack/v2/psf/nano'
 #virus_config = '/Users/gregz/cure/virus_early/virus_config'
 
-SPECBIG = ["L","R"]  
+SPECBIG = ["L","R"]
 
-CAM_IFUSLOT_DICT = {'004':'093',
-                    '037':'074',
-                    '027':'075',                
-                    '047':'076',
-                    '024':'073',
-                    '013':'084',
-                    '016':'085',
-                    '041':'086',
-                    '051':'083',
-                    '008':'094',
-                    '025':'095',
-                    '038':'096',
-                    '020':'103',
-                    '032':'104',
-                    '012':'105',
-                    '017':'106',}
-
-IFUSLOT_DICT = {'073':['024','033'],
-                '074':['037','024'],
-                '075':['027','001'],
-                '076':['047','016'],
-                '083':['051','023'],
-                '084':['013','019'],
-                '085':['016','026'],
-                '086':['041','015'],
-                '093':['004','051'],
-                '094':['008','054'],
-                '095':['025','020'],
-                '096':['038','014'],
-                '103':['020','004'],
-                '104':['032','028'],
-                '105':['012','055'],
-                '106':['017','022'],}
-
-# Dictionary of the mapping between SPECID and IFUID
-
-CAM_IFU_DICT = {'004':'051',
-                '037':'024',
-                '027':'001',                
-                '047':'016',
-                '024':'033',
-                '013':'019',
-                '016':'026',
-                '041':'015',
-                '051':'023',
-                '008':'054',
-                '025':'020',
-                '038':'014',
-                '020':'004',
-                '032':'028',
-                '012':'055',
-                '017':'022',}
+#
+# CAM_IFUSLOT_DICT = {'004':'093',
+#                     '037':'074',
+#                     '027':'075',
+#                     '047':'076',
+#                     '024':'073',
+#                     '013':'084',
+#                     '016':'085',
+#                     '041':'086',
+#                     '051':'083',
+#                     '008':'094',
+#                     '025':'095',
+#                     '038':'096',
+#                     '020':'103',
+#                     '032':'104',
+#                     '012':'105',
+#                     '017':'106',}
+#
+# IFUSLOT_DICT = {'073':['024','033'],
+#                 '074':['037','024'],
+#                 '075':['027','001'],
+#                 '076':['047','016'],
+#                 '083':['051','023'],
+#                 '084':['013','019'],
+#                 '085':['016','026'],
+#                 '086':['041','015'],
+#                 '093':['004','051'],
+#                 '094':['008','054'],
+#                 '095':['025','020'],
+#                 '096':['038','014'],
+#                 '103':['020','004'],
+#                 '104':['032','028'],
+#                 '105':['012','055'],
+#                 '106':['017','022'],}
+#
+# # Dictionary of the mapping between SPECID and IFUID
+#
+# CAM_IFU_DICT = {'004':'051',
+#                 '037':'024',
+#                 '027':'001',
+#                 '047':'016',
+#                 '024':'033',
+#                 '013':'019',
+#                 '016':'026',
+#                 '041':'015',
+#                 '051':'023',
+#                 '008':'054',
+#                 '025':'020',
+#                 '038':'014',
+#                 '020':'004',
+#                 '032':'028',
+#                 '012':'055',
+#                 '017':'022',}
                 
 # Default set of spectrographs for reduction
 SPECID = ["004","008","012","013","016","017","020","024","025","027","032",
@@ -111,6 +114,77 @@ SIDE = ["L", "R"]
 
 columnnames = ["SPECID", "NR", "ID", "S/N", "RA", "Dec", "Source_Info", "2D Plots","Spec Plots","Cutouts"]
 columnnames_cont = ["SPECID", "ID", "S/N", "RA", "Dec", "2D Plots", "Spec Plots", "Cutouts"]
+
+
+def find_fplane(date): #date as yyyymmdd string
+    """Locate the fplane file to use based on the observation date
+
+        Parameters
+        ----------
+            date : string
+                observation date as YYYYMMDD
+
+        Returns
+        -------
+            fully qualified filename of fplane file
+    """
+    #todo: validate date
+
+    filepath = fplanedir
+    if filepath[-1] != "/":
+        filepath += "/"
+    files = glob.glob(filepath + "fplane*.txt")
+
+    if len(files) > 0:
+        target_file = filepath + "fplane" + date + ".txt"
+
+        if target_file in files: #exact match for date, use this one
+            fplane = target_file
+        else:                   #find nearest earlier date
+            files.append(target_file)
+            files = sorted(files)
+            #sanity check the index
+            i = files.index(target_file)-1
+            if i < 0: #there is no valid fplane
+                print("Warning! No valid fplane file found for the given date. Will use oldest available.")
+                i = 0
+            fplane = files[i]
+    else:
+        print ("Error. No fplane files found.")
+
+    return fplane
+
+def build_fplane_dicts(fqfn):
+    """Build the dictionaries maping IFUSLOTID, SPECID and IFUID
+
+        Parameters
+        ----------
+        fqfn : string
+            fully qualified file name of the fplane file to use
+
+        Returns
+        -------
+            ifuslotid to specid, ifuid dictionary
+            specid to ifuid dictionary
+        """
+    # IFUSLOT X_FP   Y_FP   SPECID SPECSLOT IFUID IFUROT PLATESC
+    if fqfn is None:
+        print("Error! Cannot build fplane dictionaries. No fplane file.")
+        return {},{}
+
+    ifuslot, specid, ifuid = np.loadtxt(fqfn, comments='#', usecols=(0, 3, 5), dtype = int, unpack=True)
+    ifuslot_dict = {}
+    cam_ifu_dict = {}
+    cam_ifuslot_dict = {}
+
+    for i in range(len(ifuslot)):
+        if (ifuid[i] < 900) and (specid[i] < 900):
+            ifuslot_dict[str("%03d" % ifuslot[i])] = [str("%03d" % specid[i]),str("%03d" % ifuid[i])]
+            cam_ifu_dict[str("%03d" % specid[i])] = str("%03d" % ifuid[i])
+            cam_ifuslot_dict[str("%03d" % specid[i])] = str("%03d" % ifuslot[i])
+
+    return ifuslot_dict, cam_ifu_dict, cam_ifuslot_dict
+
 
 class ParseDither():
     """
@@ -180,7 +254,11 @@ def parse_args(argv=None):
 
     parser.add_argument("--dither_file", nargs='?', type=str, 
                         help='''Dither File''', 
-                        default='dither.txt')         
+                        default='dither.txt')
+
+    parser.add_argument("-sd","--scidir_date", nargs='?', type=str,
+                        help='''Science Directory Date.     [REQUIRED]
+                        Ex: \"20160412\"''', required=True, default=None)
 
     parser.add_argument("--ra", nargs='?', type=float, 
                         help='''ra''', 
@@ -507,6 +585,7 @@ def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
         sn = Cat['sigma'][i]
         chi2 = Cat['chi2'][i]
         flux = Cat['dataflux'][i]
+        eqw = Cat['eqw'][i]
         datakeep = {}
         datakeep['xi'] = []
         datakeep['yi'] = []
@@ -649,6 +728,7 @@ def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                 dict_web['Table_1'] = [('S/N: %0.2f' %(sn)),
                                        ('chi2: %0.2f' %(chi2)),
                                        ('flux: %0.1f'% (flux)),
+                                       ('eqw: %0.1f' %(eqw)),
                                        ('RA: %s' %RA), 
                                        ('Dec: %s' %DEC),
                                        ('X: %0.2f, Y: %0.2f' %(x, y))]
@@ -850,6 +930,11 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
    
 def main():
     args = parse_args()
+
+    #todo: get the date (YYYYMMDD) ... added argument, but is there a better way?
+    fplane_file = find_fplane(args.scidir_date)
+    IFUSLOT_DICT, CAM_IFU_DICT, CAM_IFUSLOT_DICT = build_fplane_dicts(fplane_file)
+
     if args.webid is None:
         webpage_name = 'Detect_Visualization_' + op.basename(args.folder)+'_emis'
         match_catalog = 'continuum_matches_'+ op.basename(args.folder) + '.dat'
@@ -945,7 +1030,7 @@ def main():
                                                                  'fluxfrac', 'sigma', 
                                                                  'chi2', 'chi2s', 
                                                                  'chi2w', 'gammq', 
-                                                                 'gammq_s', ' eqw', 
+                                                                 'gammq_s', 'eqw', 
                                                                  'cont'),
                                                  'formats': ('i4', 'i4', np.float, np.float,
                                                              np.float, np.float, np.float, np.float, 
