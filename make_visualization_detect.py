@@ -678,7 +678,7 @@ def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                                          dir_fn, 'Fe'+base_fn+'_'+side+'.fits'))
                         FEe_fn = op.join(args.folder, 'c'+specid, op.join(
                                          dir_fn, 'e.Fe'+base_fn+'_'+side+'.fits'))
-                        pix_fn = op.join(virus_config, 'PixelFlats',
+                        pix_fn = op.join(virus_config, 'PixelFlats','20161223',
                                          'pixelflat_cam%s_%s.fits'%(specid,side)) 
                         if op.exists(im_fn):
                             datakeep['im'].append(fits.open(im_fn)[0].data[yl:yh,xl:xh])
@@ -882,7 +882,7 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                                              dir_fn, 'Fe'+base_fn+'_'+side+'.fits'))
                             FEe_fn = op.join(args.folder, 'c'+specid, op.join(
                                              dir_fn, 'e.Fe'+base_fn+'_'+side+'.fits'))
-                            pix_fn = op.join(virus_config, 'PixelFlats',
+                            pix_fn = op.join(virus_config, 'PixelFlats','20161223',
                                              'pixelflat_cam%s_%s.fits'%(specid,side)) 
                             if op.exists(im_fn):
                                 datakeep['im'].append(fits.open(im_fn)[0].data[yl:yh,xl:xh])
