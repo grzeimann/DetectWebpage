@@ -282,6 +282,9 @@ def parse_args(argv=None):
     parser.add_argument("--goodsn", help='''Goods-N?''',
                         action="count", default=0)   
 
+    parser.add_argument("--cosmos", help='''COSMOS?''',
+                        action="count", default=0)  
+
     parser.add_argument("--create_header", help='''Create Just Header.''',
                         action="count", default=0)  
 
@@ -425,6 +428,9 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
     cutout = Cutout2D(data, position, (size,size), wcs=wcs)
     fig = plt.figure(figsize=(4,4))
     if args.goodsn:
+        vmin = -0.02
+        vmax = 0.08
+    elif args.cosmos:
         vmin = -0.02
         vmax = 0.08
     else:
@@ -1002,6 +1008,8 @@ def main():
             tp = TP(args.ra, args.dec, args.rot)
             if args.goodsn:
                 image_fn='/work/03564/stevenf/maverick/GOODSN/gn_acs_old_f435w_060mas_v2_drz.fits'
+            elif args.cosmos:
+                image_fn='/work/03229/iwold/maverick/stackCOSMOS/nano/COSMOS_g_sci.fits'
             else:
                 image_fn, cat_fn = pick_image(args.ra, args.dec)
             wcs = WCS(image_fn)
