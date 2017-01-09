@@ -1010,6 +1010,7 @@ def main():
                 image_fn='/work/03564/stevenf/maverick/GOODSN/gn_acs_old_f435w_060mas_v2_drz.fits'
             elif args.cosmos:
                 image_fn='/work/03229/iwold/maverick/stackCOSMOS/nano/COSMOS_g_sci.fits'
+                cat_fn='/work/03229/iwold/maverick/stackCOSMOS/cat_g.fits'
             else:
                 image_fn, cat_fn = pick_image(args.ra, args.dec)
             wcs = WCS(image_fn)
