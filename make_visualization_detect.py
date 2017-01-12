@@ -432,8 +432,8 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
         vmin = -0.02
         vmax = 0.08
     elif args.cosmos:
-        vmin = -0.02
-        vmax = 0.08
+        vmin = -11
+        vmax = 12
     else:
         vmin = -10
         vmax = 50
