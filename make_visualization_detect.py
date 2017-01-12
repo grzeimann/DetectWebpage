@@ -43,7 +43,8 @@ xw = 24 # image width in x-dir
 yw = 10 # image width in y-dir
 res = [3,9]
 ww = xw*1.9 # wavelength width
-contrast = 0.5
+contrast1 = 0.5 # regular image
+contrast2 = 0.8 # smoothed image
 virus_config = '/work/03946/hetdex/maverick/virus_config'
 fplane_file = '/home/00115/gebhardt/fplane.txt'
 fplanedir = "/work/03946/hetdex/maverick/virus_config/fplane"
@@ -424,7 +425,7 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
     ind = sorted(range(len(datakeep['d'])), key=lambda k: datakeep['d'][k], 
                  reverse=True)
     size = int(sz / pixsize_x)
-    position = SkyCoord(ras, decs, unit="deg", frame='fk5')   
+    position = SkyCoord(ras, decs, unit="deg", frame='fk5')
     cutout = Cutout2D(data, position, (size,size), wcs=wcs)
     fig = plt.figure(figsize=(4,4))
     if args.goodsn:
@@ -505,8 +506,8 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
         GF = gaussian_filter(datakeep['im'][ind[i]],(2,1))  
         implot.imshow(GF, 
                       origin="lower", cmap=cmap, 
-                      interpolation="nearest",vmin=datakeep['vmin'][ind[i]],
-                      vmax=datakeep['vmax'][ind[i]],
+                      interpolation="nearest",vmin=datakeep['vmin1'][ind[i]],
+                      vmax=datakeep['vmax1'][ind[i]],
                       extent=ext)
         implot.scatter(datakeep['xi'][ind[i]],datakeep['yi'][ind[i]],
                        marker='x',c='r',s=10)
@@ -530,8 +531,8 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
         cmap1.set_bad(color=[0.2,1.0,0.23])
         cosplot.imshow(a, 
                       origin="lower",cmap=cmap1,
-                      interpolation="nearest",vmin=datakeep['vmin'][ind[i]],
-                      vmax=datakeep['vmax'][ind[i]],
+                      interpolation="nearest",vmin=datakeep['vmin2'][ind[i]],
+                      vmax=datakeep['vmax2'][ind[i]],
                       extent=ext)
         cosplot.scatter(datakeep['xi'][ind[i]],datakeep['yi'][ind[i]],
                        marker='x',c='r',s=10)
@@ -625,8 +626,10 @@ def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
         datakeep['dx'] = []
         datakeep['dy'] = []
         datakeep['im'] = []
-        datakeep['vmin'] = []
-        datakeep['vmax'] = []
+        datakeep['vmin1'] = []
+        datakeep['vmax1'] = []
+        datakeep['vmin2'] = []
+        datakeep['vmax2'] = []
         datakeep['err'] = []
         datakeep['pix'] = []
         datakeep['spec'] = []
@@ -695,10 +698,14 @@ def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                             len_s = len(s_ind)
                             s_rank = np.arange(len_s)
                             p = np.polyfit(s_rank-len_s/2,I[s_ind],1)
-                            z1 = I[s_ind[len_s/2]]+p[0]*(1-len_s/2)/contrast
-                            z2 = I[s_ind[len_s/2]]+p[0]*(len_s-len_s/2)/contrast
-                            datakeep['vmin'].append(z1)
-                            datakeep['vmax'].append(z2)
+                            z1 = I[s_ind[len_s/2]]+p[0]*(1-len_s/2)/contrast1
+                            z2 = I[s_ind[len_s/2]]+p[0]*(len_s-len_s/2)/contrast1
+                            datakeep['vmin1'].append(z1)
+                            datakeep['vmax1'].append(z2)
+                            z1 = I[s_ind[len_s/2]]+p[0]*(1-len_s/2)/contrast2
+                            z2 = I[s_ind[len_s/2]]+p[0]*(len_s-len_s/2)/contrast2
+                            datakeep['vmin2'].append(z1)
+                            datakeep['vmax2'].append(z2)                            
                         if op.exists(err_fn):
                             datakeep['err'].append(fits.open(err_fn)[0].data[yl:yh,xl:xh])
                         if op.exists(pix_fn):
@@ -793,8 +800,10 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
             datakeep['dx'] = []
             datakeep['dy'] = []
             datakeep['im'] = []
-            datakeep['vmin'] = []
-            datakeep['vmax'] = []
+            datakeep['vmin1'] = []
+            datakeep['vmax1'] = []
+            datakeep['vmin2'] = []
+            datakeep['vmax2'] = []
             datakeep['err'] = []
             datakeep['pix'] = []
             datakeep['spec'] = []
@@ -899,10 +908,14 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                                 len_s = len(s_ind)
                                 s_rank = np.arange(len_s)
                                 p = np.polyfit(s_rank-len_s/2,I[s_ind],1)
-                                z1 = I[s_ind[len_s/2]]+p[0]*(1-len_s/2)/contrast
-                                z2 = I[s_ind[len_s/2]]+p[0]*(len_s-len_s/2)/contrast
-                                datakeep['vmin'].append(z1)
-                                datakeep['vmax'].append(z2)
+                                z1 = I[s_ind[len_s/2]]+p[0]*(1-len_s/2)/contrast1
+                                z2 = I[s_ind[len_s/2]]+p[0]*(len_s-len_s/2)/contrast1
+                                datakeep['vmin1'].append(z1)
+                                datakeep['vmax1'].append(z2)
+                                z1 = I[s_ind[len_s/2]]+p[0]*(1-len_s/2)/contrast2
+                                z2 = I[s_ind[len_s/2]]+p[0]*(len_s-len_s/2)/contrast2
+                                datakeep['vmin2'].append(z1)
+                                datakeep['vmax2'].append(z2)
                             if op.exists(err_fn):
                                 datakeep['err'].append(fits.open(err_fn)[0].data[yl:yh,xl:xh])
                             if op.exists(pix_fn):
