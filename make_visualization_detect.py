@@ -510,7 +510,7 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
                       vmax=datakeep['vmax1'][ind[i]],
                       extent=ext)
         implot.scatter(datakeep['xi'][ind[i]],datakeep['yi'][ind[i]],
-                       marker='x',c='r',s=10)
+                       marker='.',c='r', ec='r',s=10)
         implot.set_xticks([])
         implot.set_yticks([])
         implot.axis(ext)
@@ -520,7 +520,7 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
                       interpolation="nearest",vmin=0.9,vmax=1.1,
                       extent=ext)
         errplot.scatter(datakeep['xi'][ind[i]],datakeep['yi'][ind[i]],
-                       marker='x',c='r',s=10)
+                       marker='.',c='r', ec='r', s=10)
         errplot.set_xticks([])
         errplot.set_yticks([])
         errplot.axis(ext)
@@ -535,7 +535,7 @@ def build_2d_image(datakeep, outfile, cmap=None, cmap2=None, debug=False):
                       vmax=datakeep['vmax2'][ind[i]],
                       extent=ext)
         cosplot.scatter(datakeep['xi'][ind[i]],datakeep['yi'][ind[i]],
-                       marker='x',c='r',s=10)
+                       marker='.',c='r', ec='r', s=10)
         cosplot.set_xticks([])
         cosplot.set_yticks([])
         cosplot.axis(ext)
