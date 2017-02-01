@@ -1,4 +1,4 @@
-"""
+np"""
 
 @author: gregz
 
@@ -116,6 +116,36 @@ SIDE = ["L", "R"]
 columnnames = ["SPECID", "NR", "ID", "S/N", "RA", "Dec", "Source_Info", "2D Plots","Spec Plots","Cutouts"]
 columnnames_cont = ["SPECID", "ID", "S/N", "RA", "Dec", "2D Plots", "Spec Plots", "Cutouts"]
 
+
+class EmisCatalog(object):
+    @classmethod
+    def writeHeader(cls, f):
+        """Write the header to file ``f``
+
+        Parameters
+        ----------
+        f : file-like object
+            where to write to; must have a ``write`` method
+        """
+        s = []
+
+        s.append("# "+str(datetime.now()))
+        s.append("#col  1: ID ")
+        s.append("#col  2: RA ")
+        s.append("#col  3: DEC ")
+        s.append("#col  4: wave ")
+        s.append("#col  5: s/n ")
+        s.append("#col  6: chi2 ")
+        s.append("#col  7: flux ")
+
+        f.write('\n'.join(s) + "\n")
+
+    @classmethod
+    def writeEmis(cls, f, source):
+        if source is not None:
+            s = ("%s %11.6f %11.6f %11.2f %11.2f %11.2f %11.2f" % (tuple(source))
+            f.write(s + "\n")
+        f.flush()
 
 def find_fplane(date): #date as yyyymmdd string
     """Locate the fplane file to use based on the observation date
@@ -772,7 +802,10 @@ def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                 dict_web['Image_1'] = outfile_2d
                 dict_web['Image_2'] = outfile_spec
                 dict_web['Image_3'] = outfile_cut
-                CW.CreateWebpage.writeColumn(f_webpage,dict_web)  
+                CW.CreateWebpage.writeColumn(f_webpage,dict_web)
+                EmisCatalog.writeEmis(f_emis, ['%s_%s'%(specid, Cat['ID'][i]),
+                                               ras, decs, Cat['l'][i], sn, 
+                                               chi2, flux])
 
 
 
@@ -988,9 +1021,11 @@ def main():
     if args.webid is None:
         webpage_name = 'Detect_Visualization_' + op.basename(args.folder)+'_emis'
         match_catalog = 'continuum_matches_'+ op.basename(args.folder) + '.dat'
+        emis_catalog = 'emission_catalog_'+ op.basename(args.folder) + '.dat'
     else:
         webpage_name = 'Detect_Visualization_' + op.basename(args.folder) + '_' + args.webid + '_emis'
         match_catalog = 'continuum_matches_'+ op.basename(args.folder) + '_' + args.webid + '.dat'
+        emis_catalog = 'emission_catalog_'+ op.basename(args.folder) + '_' + args.webid + '.dat'
     if args.create_header:
         webpage_name = 'Detect_Visualization_' + op.basename(args.folder)+'_header'+ '_emis'
     if args.create_ending:
@@ -1007,7 +1042,8 @@ def main():
     non_sortable_cols = [7,8,9,10]
     non_sortable_cols_cont = [6,7,8]
     with open(webpage_name+'.html', 'w') as f_webpage,\
-         open(webpage_name[:-5]+'_cont.html', 'w') as f_cont_webpage:
+         open(webpage_name[:-5]+'_cont.html', 'w') as f_cont_webpage,\
+         open(emis_catlog,'w') as f_emis:
         if args.create_header:
             CW.CreateWebpage.writeHeader(f_webpage,webpage_name)
             CW.CreateWebpage.writeColumnNames(f_webpage,columnnames,non_sortable_cols)
@@ -1017,6 +1053,7 @@ def main():
             CW.CreateWebpage.writeEnding(f_webpage)     
             CW.CreateWebpage.writeEnding(f_cont_webpage)
         else:
+            EmisCatalog.writeheader(f_emis)
             fplane = FPlane(fplane_file)
             tp = TP(args.ra, args.dec, args.rot)
             if args.goodsn:
@@ -1092,8 +1129,9 @@ def main():
                                                              np.float)},ndmin=1)
                     if not Cat.size:
                         continue
+                    
                     make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, 
-                                      IFU, tp, specid, wcs, data)
+                                      IFU, tp, specid, wcs, data, f_emis)
             if args.webid is None:
                 CW.CreateWebpage.writeEnding(f_webpage)     
                 CW.CreateWebpage.writeEnding(f_cont_webpage)      
