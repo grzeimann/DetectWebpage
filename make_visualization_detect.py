@@ -804,7 +804,7 @@ def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                 dict_web['Image_2'] = outfile_spec
                 dict_web['Image_3'] = outfile_cut
                 CW.CreateWebpage.writeColumn(f_webpage,dict_web)
-                EmisCatalog.writeEmis(f_emis, [('%s_%s'%(specid, Cat['ID'][i])).rjust(10),
+                EmisCatalog.writeEmis(f_emis, [('%s_%s'%(specid, Cat['ID'][i])).ljust(10),
                                                ras, decs, Cat['l'][i], sn, 
                                                chi2, flux])
 
