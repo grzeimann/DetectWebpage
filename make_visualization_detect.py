@@ -1053,7 +1053,7 @@ def main():
             CW.CreateWebpage.writeEnding(f_webpage)     
             CW.CreateWebpage.writeEnding(f_cont_webpage)
         else:
-            EmisCatalog.writeheader(f_emis)
+            EmisCatalog.writeHeader(f_emis)
             fplane = FPlane(fplane_file)
             tp = TP(args.ra, args.dec, args.rot)
             if args.goodsn:
