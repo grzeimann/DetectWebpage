@@ -1059,6 +1059,7 @@ def main():
             tp = TP(args.ra, args.dec, args.rot)
             if args.goodsn:
                 image_fn='/work/03564/stevenf/maverick/GOODSN/gn_acs_old_f435w_060mas_v2_drz.fits'
+                cat_fn='/work/03229/iwold/maverick/stackCOSMOS/cat_g.fits'                
             elif args.cosmos:
                 image_fn='/work/03229/iwold/maverick/stackCOSMOS/nano/COSMOS_g_sci.fits'
                 cat_fn='/work/03229/iwold/maverick/stackCOSMOS/cat_g.fits'
