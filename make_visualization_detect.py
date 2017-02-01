@@ -632,7 +632,7 @@ def decimal_to_hours(ra, dec):
 
 
 def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid, 
-                      wcs, data):
+                      wcs, data, f_emis):
     for i, a  in enumerate(Cat['XS']):
         if args.debug:
             t1 = time.time()
