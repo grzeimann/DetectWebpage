@@ -33,7 +33,7 @@ from astropy import units as u
 from pyhetdex.het.fplane import FPlane
 from pyhetdex.coordinates.tangent_projection_astropy import TangentPlane as TP
 import glob
-import datetime
+from datetime import datetime
 
 plt.ioff()
 
