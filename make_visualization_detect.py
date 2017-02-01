@@ -1,4 +1,4 @@
-np"""
+"""
 
 @author: gregz
 
@@ -143,7 +143,7 @@ class EmisCatalog(object):
     @classmethod
     def writeEmis(cls, f, source):
         if source is not None:
-            s = ("%s %11.6f %11.6f %11.2f %11.2f %11.2f %11.2f" % (tuple(source))
+            s = ("%s %11.6f %11.6f %11.2f %11.2f %11.2f %11.2f" % (tuple(source)))
             f.write(s + "\n")
         f.flush()
 
