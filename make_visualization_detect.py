@@ -1043,7 +1043,7 @@ def main():
     non_sortable_cols_cont = [6,7,8]
     with open(webpage_name+'.html', 'w') as f_webpage,\
          open(webpage_name[:-5]+'_cont.html', 'w') as f_cont_webpage,\
-         open(emis_catlog,'w') as f_emis:
+         open(emis_catalog,'w') as f_emis:
         if args.create_header:
             CW.CreateWebpage.writeHeader(f_webpage,webpage_name)
             CW.CreateWebpage.writeColumnNames(f_webpage,columnnames,non_sortable_cols)
