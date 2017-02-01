@@ -1050,11 +1050,11 @@ def main():
             CW.CreateWebpage.writeColumnNames(f_webpage,columnnames,non_sortable_cols)
             CW.CreateWebpage.writeHeader(f_cont_webpage,webpage_name[:-5]+'_cont')
             CW.CreateWebpage.writeColumnNames(f_cont_webpage,columnnames_cont,non_sortable_cols_cont) 
+            EmisCatalog.writeHeader(f_emis)
         elif args.create_ending:
             CW.CreateWebpage.writeEnding(f_webpage)     
             CW.CreateWebpage.writeEnding(f_cont_webpage)
         else:
-            EmisCatalog.writeHeader(f_emis)
             fplane = FPlane(fplane_file)
             tp = TP(args.ra, args.dec, args.rot)
             if args.goodsn:
