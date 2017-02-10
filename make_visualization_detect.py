@@ -325,6 +325,9 @@ def parse_args(argv=None):
 
     parser.add_argument("--debug", help='''Debug''',
                         action="count", default=0)   
+
+    parser.add_argument("--default_ifucen", help='''use IFUcen_HETDEX.txt''',
+                        action="count", default=0) 
                                                                          
     args = parser.parse_args(args=argv) 
 
@@ -1080,7 +1083,10 @@ def main():
                 ifuy = fplane.by_ifuslot(CAM_IFUSLOT_DICT[specid]).y
                 if args.debug:
                     print(specid)
-                ifu_fn = op.join(virus_config, 'IFUcen_files', 'IFUcen_VIFU' + CAM_IFU_DICT[specid] + '.txt')
+                if args.default_ifucen:
+                    ifu_fn = op.join(virus_config, 'IFUcen_files', 'IFUcen_HETDEX.txt')
+                else:
+                    ifu_fn = op.join(virus_config, 'IFUcen_files', 'IFUcen_VIFU' + CAM_IFU_DICT[specid] + '.txt')
                 if not op.exists(ifu_fn):
                     ifu_fn = op.join(virus_config, 'IFUcen_files', 'IFUcen_HETDEX.txt')
                 if args.debug:
