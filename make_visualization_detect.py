@@ -688,8 +688,8 @@ def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                         xi = D[side].map_wf_x(Cat['l'][i],f0)
                         yi = D[side].map_wf_y(Cat['l'][i],f0)
                         datakeep['fib'].append(D[side].map_xy_fibernum(xi, yi))
-                        xfiber = IFU.xifu[side][l]-Di.dx[dither]
-                        yfiber = IFU.yifu[side][l]-Di.dy[dither]
+                        xfiber = IFU.xifu[side][l]+Di.dx[dither]
+                        yfiber = IFU.yifu[side][l]+Di.dy[dither]
                         xfiber += ifuy
                         yfiber += ifux
                         ra, dec = tp.xy2raDec(xfiber, yfiber)
@@ -901,8 +901,8 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                             xi = D[side].map_wf_x(Cat['zmin'][i]/2.+Cat['zmax'][i]/2.,f0)
                             yi = D[side].map_wf_y(Cat['zmin'][i]/2.+Cat['zmax'][i]/2.,f0)
                             datakeep['fib'].append(D[side].map_xy_fibernum(xi, yi))
-                            xfiber = IFU.xifu[side][l]-Di.dx[dither]
-                            yfiber = IFU.yifu[side][l]-Di.dy[dither]
+                            xfiber = IFU.xifu[side][l]+Di.dx[dither]
+                            yfiber = IFU.yifu[side][l]+Di.dy[dither]
                             xfiber += ifuy
                             yfiber += ifux
                             ra, dec = tp.xy2raDec(xfiber, yfiber)
