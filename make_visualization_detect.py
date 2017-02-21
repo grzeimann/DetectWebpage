@@ -316,6 +316,8 @@ def parse_args(argv=None):
 
     parser.add_argument("--cosmos", help='''COSMOS?''',
                         action="count", default=0)  
+    
+    parser.add_argument("--aegis", help="AEGIS?", action='count', default=0)
 
     parser.add_argument("--create_header", help='''Create Just Header.''',
                         action="count", default=0)  
@@ -1065,6 +1067,9 @@ def main():
                 cat_fn='/work/03229/iwold/maverick/stackCOSMOS/cat_g.fits'                
             elif args.cosmos:
                 image_fn = '/work/02099/hagen/maverick/imaging/hlsp_candels_hst_acs_cos-tot_f606w_v1.0_drz.fits'
+                cat_fn='/work/03229/iwold/maverick/stackCOSMOS/cat_g.fits'
+            elif args.aegis:
+                image_fn = '/work/02099/hagen/maverick/imaging/aegis_hst_acs_F606W_drz.fits'
                 cat_fn='/work/03229/iwold/maverick/stackCOSMOS/cat_g.fits'
             else:
                 image_fn, cat_fn = pick_image(args.ra, args.dec)
