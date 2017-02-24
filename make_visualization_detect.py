@@ -470,6 +470,9 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
     elif args.cosmos:
         vmin = -11
         vmax = 12
+    elif args.aegis:
+        vmin=-.1
+        vmax=.1
     else:
         vmin = -10
         vmax = 50
@@ -1069,7 +1072,8 @@ def main():
                 image_fn = '/work/02099/hagen/maverick/imaging/hlsp_candels_hst_acs_cos-tot_f606w_v1.0_drz.fits'
                 cat_fn='/work/03229/iwold/maverick/stackCOSMOS/cat_g.fits'
             elif args.aegis:
-                image_fn = '/work/02099/hagen/maverick/imaging/aegis_hst_acs_F606W_drz.fits'
+                image_fn = '/work/03564/stevenf/maverick/Data/EGS/egs_all_acs_wfc_f606w_060mas_v1.1_drz.fits'
+                #image_fn = '/work/02099/hagen/maverick/imaging/aegis_hst_acs_F606W_drz.fits'
                 cat_fn='/work/03229/iwold/maverick/stackCOSMOS/cat_g.fits'
             else:
                 image_fn, cat_fn = pick_image(args.ra, args.dec)
