@@ -31,7 +31,7 @@ from astropy.wcs import WCS
 from astropy.wcs.utils import skycoord_to_pixel
 from astropy import units as u
 from pyhetdex.het.fplane import FPlane
-from pyhetdex.coordinates.tangent_projection_astropy import TangentPlane as TP
+from pyhetdex.coordinates.tangent_projection import TangentPlane as TP
 import glob
 from datetime import datetime
 
