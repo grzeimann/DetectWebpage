@@ -39,7 +39,7 @@ plt.ioff()
 
 
 dist_thresh = 2. # Fiber Distance
-sn_cut = 4.0 # S/N Cut
+sn_cut = 5.0 # S/N Cut
 xw = 24 # image width in x-dir 
 yw = 10 # image width in y-dir
 res = [3,9]
@@ -471,8 +471,8 @@ def make_image_cutout(datakeep, data, wcs, ras, decs, outfile, cmap2=None,
         vmin = -11
         vmax = 12
     elif args.aegis:
-        vmin=-.1
-        vmax=.1
+        vmin=-1
+        vmax=1.4
     else:
         vmin = -10
         vmax = 50
@@ -1069,10 +1069,12 @@ def main():
                 image_fn='/work/03564/stevenf/maverick/GOODSN/gn_acs_old_f435w_060mas_v2_drz.fits'
                 cat_fn='/work/03229/iwold/maverick/stackCOSMOS/cat_g.fits'                
             elif args.cosmos:
-                image_fn = '/work/02099/hagen/maverick/imaging/hlsp_candels_hst_acs_cos-tot_f606w_v1.0_drz.fits'
+                image_fn='/work/03229/iwold/maverick/stackCOSMOS/nano/COSMOS_g_sci.fits'
+                #image_fn = '/work/02099/hagen/maverick/imaging/hlsp_candels_hst_acs_cos-tot_f606w_v1.0_drz.fits'
                 cat_fn='/work/03229/iwold/maverick/stackCOSMOS/cat_g.fits'
             elif args.aegis:
-                image_fn = '/work/03564/stevenf/maverick/Data/EGS/egs_all_acs_wfc_f606w_060mas_v1.1_drz.fits'
+                #image_fn = '/work/03564/stevenf/maverick/Data/EGS/egs_all_acs_wfc_f606w_060mas_v1.1_drz.fits'
+                image_fn = '/work/03229/iwold/maverick/groth/groth.fits'
                 #image_fn = '/work/02099/hagen/maverick/imaging/aegis_hst_acs_F606W_drz.fits'
                 cat_fn='/work/03229/iwold/maverick/stackCOSMOS/cat_g.fits'
             else:
