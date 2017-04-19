@@ -20,7 +20,7 @@ import textwrap
 import CreateWebpage as CW
 from collections import OrderedDict
 from pyhetdex.het.ifu_centers import IFUCenter
-from astropy.stats import biweight_location
+from astropy.stats import biweight_midvariance
 from scipy.ndimage.filters import gaussian_filter
 from astropy.modeling.models import Moffat2D, Gaussian2D
 from photutils import CircularAperture, aperture_photometry
@@ -439,7 +439,7 @@ def build_spec_image(datakeep, outfile, cwave, dwave=1.0, cmap=None,
     specplot.step(bigwave, F, c='b',where='mid',lw=2)
     ran = mx - mn
     specplot.errorbar(cwave-.8*ww, mn+ran*(1+rm)*0.85, 
-                      yerr=biweight_location(np.array(datakeep['spece'][:])),
+                      yerr=biweight_midvariance(np.array(datakeep['spec'][:])),
                       fmt='o',marker='o', ms=4, mec='k', ecolor=[0.7,0.7,0.7],
                       mew=1, elinewidth=3, mfc=[0.7,0.7,0.7])
     specplot.plot([cwave,cwave],[mn-ran*rm, mn+ran*(1+rm)],ls='--',c=[0.3,0.3,0.3])
@@ -672,10 +672,8 @@ def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
         datakeep['err'] = []
         datakeep['pix'] = []
         datakeep['spec'] = []
-        datakeep['spece'] = []
         datakeep['specwave'] = []
         datakeep['cos'] = []
-        datakeep['par'] = []
         datakeep['ra'] = []
         datakeep['dec'] = []
         ras, decs = tp.xy2raDec(x+ifuy,y+ifux)
@@ -724,13 +722,10 @@ def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                                          dir_fn, 'c'+base_fn+'_'+side+'.fits'))
                         FE_fn = op.join(args.folder, 'c'+specid, op.join(
                                          dir_fn, 'Fe'+base_fn+'_'+side+'.fits'))
-                        FEe_fn = op.join(args.folder, 'c'+specid, op.join(
-                                         dir_fn, 'e.Fe'+base_fn+'_'+side+'.fits'))
                         pix_fn = op.join(virus_config, 'PixelFlats','20161223',
                                          'pixelflat_cam%s_%s.fits'%(specid,side)) 
                         if op.exists(im_fn):
                             datakeep['im'].append(fits.open(im_fn)[0].data[yl:yh,xl:xh])
-                            datakeep['par'].append(fits.open(im_fn)[0].header['PARANGLE'])
                             I = fits.open(im_fn)[0].data.ravel()
                             I[np.isnan(I)] = 0.0
                             s_ind = np.argsort(I)
@@ -753,7 +748,6 @@ def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                             datakeep['cos'].append(fits.open(cos_fn)[0].data[yl:yh,xl:xh])
                         if op.exists(FE_fn):
                             FE = fits.open(FE_fn)[0].data
-                            FEe = fits.open(FEe_fn)[0].data
                             nfib, xlen = FE.shape
                             crval = fits.open(FE_fn)[0].header['CRVAL1']
                             cdelt = fits.open(FE_fn)[0].header['CDELT1']
@@ -761,7 +755,6 @@ def make_emission_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                             Fe_indl = np.searchsorted(wave,Cat['l'][i]-ww,side='left')
                             Fe_indh = np.searchsorted(wave,Cat['l'][i]+ww,side='right')
                             datakeep['spec'].append(FE[l,Fe_indl:(Fe_indh+1)])
-                            datakeep['spece'].append(FEe[l,Fe_indl:(Fe_indh+1)])
                             datakeep['specwave'].append(wave[Fe_indl:(Fe_indh+1)])
             if datakeep['xi']:
                 if args.debug:
@@ -849,10 +842,8 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
             datakeep['err'] = []
             datakeep['pix'] = []
             datakeep['spec'] = []
-            datakeep['spece'] = []
             datakeep['specwave'] = []
             datakeep['cos'] = []
-            datakeep['par'] = []
             datakeep['ra'] = []
             datakeep['dec'] = []
             ras, decs = tp.xy2raDec(x+ifuy,y+ifux)
@@ -937,13 +928,10 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                                              dir_fn, 'c'+base_fn+'_'+side+'.fits'))
                             FE_fn = op.join(args.folder, 'c'+specid, op.join(
                                              dir_fn, 'Fe'+base_fn+'_'+side+'.fits'))
-                            FEe_fn = op.join(args.folder, 'c'+specid, op.join(
-                                             dir_fn, 'e.Fe'+base_fn+'_'+side+'.fits'))
                             pix_fn = op.join(virus_config, 'PixelFlats','20161223',
                                              'pixelflat_cam%s_%s.fits'%(specid,side)) 
                             if op.exists(im_fn):
                                 datakeep['im'].append(fits.open(im_fn)[0].data[yl:yh,xl:xh])
-                                datakeep['par'].append(fits.open(im_fn)[0].header['PARANGLE'])
                                 I = fits.open(im_fn)[0].data.ravel()
                                 I[np.isnan(I)] = 0.0
                                 s_ind = np.argsort(I)
@@ -966,7 +954,6 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                                 datakeep['cos'].append(fits.open(cos_fn)[0].data[yl:yh,xl:xh])
                             if op.exists(FE_fn):
                                 FE = fits.open(FE_fn)[0].data
-                                FEe = fits.open(FEe_fn)[0].data
                                 nfib, xlen = FE.shape
                                 crval = fits.open(FE_fn)[0].header['CRVAL1']
                                 cdelt = fits.open(FE_fn)[0].header['CDELT1']
@@ -974,7 +961,6 @@ def make_continuum_row(Cat, f_webpage, args, D, Di, ifux, ifuy, IFU, tp, specid,
                                 Fe_indl = np.searchsorted(wave,Cat['zmin'][i]/2.+Cat['zmax'][i]/2.-ww,side='left')
                                 Fe_indh = np.searchsorted(wave,Cat['zmin'][i]/2.+Cat['zmax'][i]/2.+ww,side='right')
                                 datakeep['spec'].append(FE[l,Fe_indl:(Fe_indh+1)])
-                                datakeep['spece'].append(FEe[l,Fe_indl:(Fe_indh+1)])
                                 datakeep['specwave'].append(wave[Fe_indl:(Fe_indh+1)])
                 if datakeep['xi']:
                     if args.debug:
@@ -1064,7 +1050,7 @@ def main():
             CW.CreateWebpage.writeEnding(f_cont_webpage)
         else:
             fplane = FPlane(fplane_file)
-            tp = TP(args.ra, args.dec, args.rot)
+            tp = TP(args.ra, args.dec, 360. - (90+1.3+args.rot))
             if args.goodsn:
                 image_fn='/work/03564/stevenf/maverick/GOODSN/gn_acs_old_f435w_060mas_v2_drz.fits'
                 cat_fn='/work/03229/iwold/maverick/stackCOSMOS/cat_g.fits'                
