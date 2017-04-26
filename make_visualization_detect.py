@@ -311,13 +311,13 @@ def parse_args(argv=None):
                         help='''List of SPECID's for processing. 
                         Ex: "020,008".''', default = None)
 
-    parser.add_argument("--goodsn", help='''Goods-N?''',
-                        action="count", default=0)   
-
-    parser.add_argument("--cosmos", help='''COSMOS?''',
-                        action="count", default=0)  
-    
-    parser.add_argument("--aegis", help="AEGIS?", action='count', default=0)
+#    parser.add_argument("--goodsn", help='''Goods-N?''',
+#                        action="count", default=0)   
+#
+#    parser.add_argument("--cosmos", help='''COSMOS?''',
+#                        action="count", default=0)  
+#    
+#    parser.add_argument("--aegis", help="AEGIS?", action='count', default=0)
 
     parser.add_argument("--create_header", help='''Create Just Header.''',
                         action="count", default=0)  
@@ -359,6 +359,22 @@ def parse_args(argv=None):
         msg = 'Pick create_header or create_ending, not both'
         parser.error(msg)        
     return args
+    
+    if ((args.ra > 210.) and (args.ra < 225.) 
+                         and (args.dec > 52.) and (args.dec < 53.)):
+        args.aegis = True
+    else:
+        args.aegis = False
+    if ((args.ra > 142.5) and (args.ra < 157.5) 
+                         and (args.dec > 2.) and (args.dec < 3.)):
+        args.cosmos = True
+    else:
+        args.cosmos = False
+    if ((args.ra > 180.) and (args.ra < 195.) 
+                         and (args.dec > 62.) and (args.dec < 63.)):
+        args.goodsn = True
+    else:
+        args.goodsn = False
     
 def pick_image(ra, dec):
     letters = ['A','B','C']
