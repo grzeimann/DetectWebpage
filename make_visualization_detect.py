@@ -358,10 +358,9 @@ def parse_args(argv=None):
     if args.create_header and args.create_ending:
         msg = 'Pick create_header or create_ending, not both'
         parser.error(msg)        
-    return args
     
     if ((args.ra > 210.) and (args.ra < 225.) 
-                         and (args.dec > 52.) and (args.dec < 53.)):
+                         and (args.dec > 52.) and (args.dec < 54.)):
         args.aegis = True
     else:
         args.aegis = False
@@ -375,7 +374,9 @@ def parse_args(argv=None):
         args.goodsn = True
     else:
         args.goodsn = False
-    
+        
+    return args
+
 def pick_image(ra, dec):
     letters = ['A','B','C']
     numbers = np.arange(10)
